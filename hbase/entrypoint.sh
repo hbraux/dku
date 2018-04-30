@@ -12,7 +12,7 @@ function _setup {
  </property>
  <property>
   <name>hbase.rest.port</name>
-  <value>16000</value>
+  <value>${REST_PORT}</value>
  </property>
 </configuration>
 EOF
@@ -26,7 +26,7 @@ function _setupcli {
 <configuration>
  <property>
   <name>hbase.zookeeper.quorum</name>
-  <value>hbase-server</value>
+  <value>${SERVER_NAME}</value>
  </property>
 </configuration>
 EOF
@@ -34,12 +34,12 @@ EOF
 
 function _start {
   _setup
-  if [[ $DOCKER_PROFILE == slim ]]
+  if [[ $HEAP == low ]]
   then HBASE_HEAPSIZE=32m bin/hbase rest start  &
   else bin/hbase rest start  &
   fi
-  [[ $DOCKER_PROFILE == slim ]] && HBASE_HEAPSIZE=128m
-  egrep -q '[0-9]+[kmg]'<<<$DOCKER_PROFILE && HBASE_HEAPSIZE=$DOCKER_PROFILE
+  [[ $HEAP == low ]] && HBASE_HEAPSIZE=128m
+  egrep -q '[0-9]+[kmg]'<<<$HEAP && HBASE_HEAPSIZE=$HEAP
   export HBASE_HEAPSIZE
   exec bin/hbase master start
 }
