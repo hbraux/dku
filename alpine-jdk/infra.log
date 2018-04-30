@@ -1,0 +1,81 @@
+[1;30m$ docker build -t alpine-jdk:latest -t alpine-jdk:8 --build-arg http_proxy=http://192.168.56.31:3128 --build-arg https_proxy=http://192.168.56.31:3128 --build-arg no_proxy=192.168.56.101,docker1.hostonly.com,gitlab.acc.edf.fr,si-devops-gitlab.edf.fr /home/harold/git/hub/docker-light/alpine-jdk[m
+Sending build context to Docker daemon  3.072kB
+Step 1/8 : FROM alpine:3.7
+ ---> 3fd9065eaf02
+Step 2/8 : ENV JDK_VERSION 8
+ ---> Running in ec0a779d4a9d
+Removing intermediate container ec0a779d4a9d
+ ---> 711ffa9e90b8
+Step 3/8 : LABEL Description="Alpine OpenJDK ${JDK_VERSION} with bash"
+ ---> Running in 5fdcc0600611
+Removing intermediate container 5fdcc0600611
+ ---> f1521a578763
+Step 4/8 : LABEL Usage="docker run -it --rm alpine-jdk bash"
+ ---> Running in c661d69f6537
+Removing intermediate container c661d69f6537
+ ---> 8e5ac258671a
+Step 5/8 : ENV LANG C.UTF-8
+ ---> Running in 67123a3aa238
+Removing intermediate container 67123a3aa238
+ ---> 3a3a3b54855b
+Step 6/8 : ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
+ ---> Running in e37b4b15d5c6
+Removing intermediate container e37b4b15d5c6
+ ---> 331c18ca2252
+Step 7/8 : ENV PATH $PATH:$JAVA_HOME/bin
+ ---> Running in e8e6b18dc610
+Removing intermediate container e8e6b18dc610
+ ---> 0fa08d209ade
+Step 8/8 : RUN apk update && apk add --no-cache bash ca-certificates curl libc6-compat openjdk8-jre-base=8.151.12-r0     && rm -rf /var/cache/apk/*      && cd /usr/share/terminfo && ls | grep -v 'xterm$' | xargs rm -fr
+ ---> Running in 70d319b8f9f1
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/community/x86_64/APKINDEX.tar.gz
+v3.7.0-74-g1540930789 [http://dl-cdn.alpinelinux.org/alpine/v3.7/main]
+v3.7.0-73-g5f006fb2a0 [http://dl-cdn.alpinelinux.org/alpine/v3.7/community]
+OK: 9047 distinct packages available
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.7/community/x86_64/APKINDEX.tar.gz
+(1/34) Upgrading musl (1.1.18-r2 -> 1.1.18-r3)
+(2/34) Installing pkgconf (1.3.10-r0)
+(3/34) Installing ncurses-terminfo-base (6.0_p20171125-r0)
+(4/34) Installing ncurses-terminfo (6.0_p20171125-r0)
+(5/34) Installing ncurses-libs (6.0_p20171125-r0)
+(6/34) Installing readline (7.0.003-r0)
+(7/34) Installing bash (4.4.19-r1)
+Executing bash-4.4.19-r1.post-install
+(8/34) Installing ca-certificates (20171114-r0)
+(9/34) Installing libcurl (7.58.0-r0)
+(10/34) Installing curl (7.58.0-r0)
+(11/34) Upgrading musl-utils (1.1.18-r2 -> 1.1.18-r3)
+(12/34) Installing libc6-compat (1.1.18-r3)
+(13/34) Installing openjdk8-jre-lib (8.151.12-r0)
+(14/34) Installing java-common (0.1-r0)
+(15/34) Installing libffi (3.2.1-r4)
+(16/34) Installing libtasn1 (4.12-r2)
+(17/34) Installing p11-kit (0.23.2-r2)
+(18/34) Installing p11-kit-trust (0.23.2-r2)
+(19/34) Installing java-cacerts (1.0-r0)
+(20/34) Installing libjpeg-turbo (1.5.2-r0)
+(21/34) Installing krb5-conf (1.0-r1)
+(22/34) Installing libcom_err (1.43.7-r0)
+(23/34) Installing keyutils-libs (1.5.10-r0)
+(24/34) Installing libverto (0.3.0-r0)
+(25/34) Installing krb5-libs (1.15.2-r1)
+(26/34) Installing lcms2 (2.8-r1)
+(27/34) Installing nspr (4.17-r0)
+(28/34) Installing libgcc (6.4.0-r5)
+(29/34) Installing sqlite-libs (3.21.0-r0)
+(30/34) Installing libstdc++ (6.4.0-r5)
+(31/34) Installing nss (3.34.1-r0)
+(32/34) Installing pcsc-lite-libs (1.8.22-r0)
+(33/34) Installing lksctp-tools (1.0.17-r0)
+(34/34) Installing openjdk8-jre-base (8.151.12-r0)
+Executing busybox-1.27.2-r7.trigger
+Executing ca-certificates-20171114-r0.trigger
+Executing java-common-0.1-r0.trigger
+OK: 82 MiB in 43 packages
+Removing intermediate container 70d319b8f9f1
+ ---> 59ef423bb35c
+Successfully built 59ef423bb35c
+Successfully tagged alpine-jdk:latest
+Successfully tagged alpine-jdk:8

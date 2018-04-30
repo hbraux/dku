@@ -1,0 +1,16 @@
+FROM alpine:3.7
+
+ENV JDK_VERSION 8
+
+LABEL Description="Alpine OpenJDK ${JDK_VERSION} with bash"
+LABEL Usage="docker run -it --rm alpine-jdk bash"
+
+ENV LANG C.UTF-8
+ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
+ENV PATH $PATH:$JAVA_HOME/bin
+
+RUN apk update && apk add --no-cache bash ca-certificates curl libc6-compat openjdk8-jre-base=8.151.12-r0 \
+    && rm -rf /var/cache/apk/*  \
+    # remove useless Bash terms
+    && cd /usr/share/terminfo && ls | grep -v 'xterm$' | xargs rm -fr
+
