@@ -3,7 +3,7 @@
 # Note that Alpine is provided with muscl and not supposed to support glibc 
 # https://wiki.alpinelinux.org/wiki/Running_glibc_programs
 
-# Also provides curl, certificates, bash and git
+# Also install curl, certificates, bash, git
 
 FROM alpine:3.7
 

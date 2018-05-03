@@ -16,7 +16,7 @@ export -f _setup
 function _start {
   _setup
   java -Dfile.encoding=UTF-8 -server -jar restheart.jar etc/rest.yml --fork
-  exec mongod 
+  exec mongod --smallfiles --oplogSize 128
 }
 
 case $1 in

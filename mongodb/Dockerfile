@@ -1,3 +1,4 @@
+# JDK is needed for Restheart not for MongoDB
 FROM alpine-jdk
 
 ARG URL_DOWNLOAD=https://github.com/SoftInstigate
@@ -38,4 +39,4 @@ EXPOSE ${REST_PORT}
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-CMD [ "help"]
+CMD [ "start"]

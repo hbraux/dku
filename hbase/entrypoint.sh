@@ -3,7 +3,8 @@
 function _setup {
   [[ -f .setup ]] && return
 
-  cat > conf/hbase-site.xml <<EOF
+  # Warning, in sandalone mode, HBASE use random ports. See https://stackoverflow.com/questions/43524733/how-to-specify-rpc-server-port-for-hbase
+ cat > conf/hbase-site.xml <<EOF
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
  <property>
@@ -18,7 +19,6 @@ function _setup {
 EOF
   touch .setup
 }
-export -f _setup # testing purpose
 
 function _setupcli {
   cat > conf/hbase-site.xml <<EOF
