@@ -28,3 +28,5 @@ ENTRYPOINT exec rethinkdb --bind all -d /data -n ${SERVER_NAME} --http-port ${WE
 
 
 
+
+

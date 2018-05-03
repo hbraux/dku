@@ -6,7 +6,10 @@ FROM alpine-glibc
 ARG URL_DOWNLOAD=""
 
 # extra packages to install
-ARG CONDA_PACKAGES=requetes
+ARG CONDA_PACKAGES=requests
+
+# extra packages to install from forge
+ARG CONDA_FORGE_PACKAGES=python-avro,faker
 
 ENV LANG C.UTF-8
 
@@ -26,7 +29,9 @@ RUN set -x && \
     rm ~/miniconda.sh  && \
     conda config --add channels ${URL_DOWNLOAD:-https://repo.anaconda.com}/pkgs/main && \
     conda update --yes --name base conda && \
-    conda install --yes ${CONDA_PACKAGES//,/ } 
+    conda install --yes ${CONDA_PACKAGES//,/ } && \
+    conda config --add channels ${URL_DOWNLOAD:-https://conda.anaconda.org}/conda-forge && \
+    conda install --yes ${CONDA_FORGE_PACKAGES//,/ }
 
 CMD [ "python" ]
 
