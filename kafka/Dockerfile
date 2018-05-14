@@ -6,8 +6,6 @@ ENV KAFKA_VERSION 0.10.2.1
 
 ENV SCALA_VERSION 2.10 
 
-ENV IMAGE_INFO Kafka ${KAFKA_VERSION} slim server
-
 # supported values: low, default, or a size
 ENV HEAP low
 

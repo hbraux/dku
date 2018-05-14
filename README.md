@@ -13,7 +13,9 @@ Name | Size | Description and RAM consumption
 ---- | ---- | ----
 alpine-jdk   | 80MB  | base image with Open-JDK 8 and bash
 alpine-glibc | 30MB  | base image with prerequisites for Conda installation
-hbase        | 162MB | HBase 1.2.6 sdandalone with Rest Server (300MB)
+hbase        | 162MB | HBase 1.2.6 standalone server with Rest API (300MB)
+kafka        | 118MB | Kafka 0.10 standalone server (250MB)
+spark        | 310MB | Spark 1.6.0 standalone server 
 elastic      | 116MB | Elasticsearch 5.6 standalone server (300MB)
 mongodb      | 192MB | MongoDB 3.4.10 with Restheart (80 MB)
 rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
