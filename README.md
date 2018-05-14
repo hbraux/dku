@@ -17,9 +17,9 @@ hbase        | 162MB | HBase 1.2.6 sdandalone with Rest Server (300MB)
 elastic      | 116MB | Elasticsearch 5.6 standalone server (300MB)
 mongodb      | 192MB | MongoDB 3.4.10 with Restheart (80 MB)
 rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
-py2          | 287MB | Conda python2
-py3          | 347MB | Conda python3
-jupyter      | 2.3GB | Conda Jupyter Server with python2 and major datascience libs
+py2          | 287MB | Conda python2 env
+py3          | 347MB | Conda python3 env
+jupyter      | 2.3GB | Conda Jupyter Server with python3 and main datascience libs
 bigchaindb   | 420MB | BigchainDB
 
 ## TODO list

@@ -14,8 +14,8 @@ ARG CONDA_FORGE_PACKAGES=python-avro,faker
 ENV LANG C.UTF-8
 
 
-ENV PY2_VERSION 4.4
-ENV CONDA_VERSION 4.4.10
+ENV PY2_VERSION 4.5
+ENV CONDA_VERSION 4.5.1
 
 LABEL Description="Python2 with miniconda ${CONDA_VERSION} "
 LABEL Usage="docker run -ti --rm --network=udn py2"
