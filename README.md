@@ -22,6 +22,7 @@ rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
 py2          | 287MB | Conda python2 env
 py3          | 347MB | Conda python3 env
 jupyter      | 2.3GB | Conda Jupyter Server with python3 and main datascience libs
+nifi         | 350MB | NiFi 1.5.0 slim server 
 bigchaindb   | 420MB | BigchainDB
 
 ## TODO list
