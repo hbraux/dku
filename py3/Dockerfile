@@ -5,13 +5,13 @@ FROM alpine-glibc
 # can be overriden to a local http cache
 ARG URL_DOWNLOAD=""
 
-# extra packages to install
+# extra packages to install 
 ARG CONDA_PACKAGES=requests
 
 ENV LANG C.UTF-8
 
-ENV PY3_VERSION 4.4
-ENV CONDA_VERSION 4.4.10
+ENV PY3_VERSION 3.6.4
+ENV CONDA_VERSION 4.5.1
 
 LABEL Description="Python3 with miniconda ${CONDA_VERSION} "
 LABEL Usage="docker run -ti --rm --network=udn py3"

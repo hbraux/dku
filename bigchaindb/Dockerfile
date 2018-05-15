@@ -12,10 +12,10 @@ LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn --mount source=bi
 LABEL Usage2="docker run -it --rm --network=udn bigchaindb mongo-shell"
 LABEL Usage3="docker run -it --rm --network=udn bigchaindb python"
 
-RUN apk update && apk add --no-cache bash g++ make musl-dev python3 python3-dev libffi-dev libressl-dev mongodb
-RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools
-RUN pip3 install bigchaindb_driver
-RUN mkdir -p /data/db /usr/src/app
+RUN set -x && mkdir -p /data/db /usr/src/app \
+    && apk update && apk add --no-cache bash g++ make musl-dev python3 python3-dev libffi-dev libressl-dev mongodb \
+    && python3 -m ensurepip && pip3 install --upgrade pip setuptools \
+    && pip3 install bigchaindb_driver
 
 ENV BIGCHAINDB_CONFIG_PATH /data/.bigchaindb
 ENV BIGCHAINDB_SERVER_WORKERS 1

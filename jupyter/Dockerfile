@@ -12,7 +12,7 @@ ARG CONDA_FORGE_PACKAGES=""
 ENV LANG C.UTF-8
 
 ENV JUPYTER_VERSION 4.4
-ENV CONDA_VERSION 4.4.10
+ENV CONDA_VERSION 4.5.1
 
 LABEL Description="Conda/Jupyter Server $JUPYTER_VERSION"
 LABEL Usage="docker run -d --name=jupyter --network=udn --mount source=jupyter,target=/data -p 8888:8888 jupyter start"
@@ -27,7 +27,7 @@ RUN set -x  \
     && conda config --add channels ${URL_DOWNLOAD:-https://repo.anaconda.com}/pkgs/main \
     && conda update --yes --name base conda \
     && conda install --yes ${CONDA_PACKAGES//,/ } \
-    && adduser -D -h /data -s /bin/bash jupyter
+    && adduser -D -h /data -s /bin/bash jupyter 
 
 RUN test -n "$CONDA_FORGE_PACKAGES" && set -x && conda config --add channels ${URL_DOWNLOAD:-https://conda.anaconda.org}/conda-forge && conda install --yes ${CONDA_FORGE_PACKAGES//,/ } || :
 
