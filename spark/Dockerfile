@@ -16,9 +16,8 @@ LABEL Usage2="docker run -it --rm --network=udn spark pyspark --master spark://s
 LABEL Usage3="docker cp test.py spark:/data && docker run -it --rm -v spark:/data --network=udn spark spark-submit /data/test.py --master spark://spark:7077"
 
 # add python2 for pyspark
-RUN apk add --no-cache python2  libc6-compat
-
-RUN set -x && mkdir -p /opt  \
+RUN set -x && apk add --no-cache python2  libc6-compat \
+    && mkdir -p /opt  \
     && curl -s ${URL_DOWNLOAD}/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.6.tgz | tar xzf - -C /opt \
     && mv /opt/spark-${SPARK_VERSION}-bin-hadoop2.6 /opt/spark \
     && adduser -D -s /sbin/nologin spark \
