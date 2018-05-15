@@ -21,7 +21,7 @@ ENV BIGCHAINDB_CONFIG_PATH /data/.bigchaindb
 ENV BIGCHAINDB_SERVER_WORKERS 1
 
 COPY entrypoint.sh /
-COPY ../../bigchaindb/bigchaindb /usr/src/app/bigchaindb
+COPY bigchaindb /usr/src/app/bigchaindb
 
 WORKDIR /usr/src/app
 
