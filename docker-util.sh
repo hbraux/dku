@@ -2,7 +2,8 @@
 # A docker helper to build, run and manage Docker images
 
 TOOL_NAME=docker-util
-TOOL_VERS=0.0.3
+TOOL_VERS=0.0.4
+
 
 ###############################################################################
 # BEGIN: common.sh 2.3
@@ -43,7 +44,7 @@ declare Arguments=
 # -----------------------------------------------------------------------------
 
 # file cheksum, updated when commiting in Git
-_MD5SUM="f672403e1c3f0b9102e33780a12bdef4"
+_MD5SUM="235d78c06cfc5e488e7953c1a2c5c246"
 
 # config file
 declare _CfgFile=$(dirname $0)/.${TOOL_NAME}.cfg
