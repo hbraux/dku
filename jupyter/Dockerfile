@@ -5,9 +5,9 @@ FROM alpine-glibc
 # can be overriden to a local http cache
 ARG URL_DOWNLOAD=""
 
-ARG CONDA_PACKAGES=matplotlib,pandas,jupyter,scikit-learn,plotly,quandl
+ARG CONDA_PACKAGES=jupyter,pandas,scikit-learn,matplotlib,plotly,quandl
 
-ARG CONDA_FORGE_PACKAGES=""
+ARG CONDA_FORGE_PACKAGES="python-avro"
 
 ENV LANG C.UTF-8
 

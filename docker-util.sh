@@ -5,8 +5,9 @@ TOOL_NAME=docker-util
 TOOL_VERS=0.0.3
 
 ###############################################################################
-# BEGIN: common.sh 2.2
+# BEGIN: common.sh 2.3
 ###############################################################################
+# Warning versions 2.x are not compatible with 1.x
 
 [[ -n $TOOL_NAME ]] || TOOL_NAME=${0/.sh/}
 
@@ -30,6 +31,8 @@ declare TmpDir=$HOME/tmp.${TOOL_NAME}_d$$
 
 # Log file (appending)
 declare LogFile=${TOOL_NAME}.log
+# by defaults logs are in current directory unless there's a logs directory
+[[ -d $HOME/logs ]] && LogFile=$HOME/logs/$LogFile
 
 # command line parameters
 declare Command=
@@ -40,7 +43,7 @@ declare Arguments=
 # -----------------------------------------------------------------------------
 
 # file cheksum, updated when commiting in Git
-_MD5SUM="9b7574524056aa2193958d61e44eeb5c"
+_MD5SUM="f672403e1c3f0b9102e33780a12bdef4"
 
 # config file
 declare _CfgFile=$(dirname $0)/.${TOOL_NAME}.cfg
