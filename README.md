@@ -1,11 +1,16 @@
 # docker-light
 A set of slim docker images based on Alpine Linux with low memoy requirements.
-To be used for testing or development purpose, mostly on Virtualbox VMs.
+To be used for testing or development purpose, on a Virtualbox VM .
 
-All images are auto-descriptive. Just inspect the labels to get description and usage(s)
+All images are auto-descriptive. Just inspect the labels to get description
+and usage(s) :
 ```sh
 docker inspect --format='{{range $k,$v:=.Config.Labels}}{{$k}}: {{println $v}}{{end}}' hbase
 ```
+
+The included script `docker-util.sh` provides somes helpers to build, run and
+maange Docker images (make an alias on it)
+
 
 ## Image List
 
