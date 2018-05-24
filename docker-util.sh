@@ -315,17 +315,6 @@ function dockerBuild {
     egrep -q '^LABEL Usage' $DockerDir/Dockerfile || \
       warn "No Usage Label in Dockerfile"
   fi
-  if [ -f  $DockerDir/TOOLS ]
-  then mkdir -p $DockerDir/tools
-       for tool in $(cat $DockerDir/TOOLS)
-       do [[ -f $HOME/bin/$tool ]] || die "Cannot find $HOME/bin/$tool"
-	  diff $HOME/bin/$tool $DockerDir/tools/$tool >/dev/null
-	  if [[ $? -ne 0 ]]
-	  then info "Updating $DockerDir/tools/$tool"
-               cp -f $HOME/bin/$tool $DockerDir/tools/
-	  fi
-       done
-  fi
   tags="-t $DockerImg:latest"
   [[ -n $vers ]] && tags="$tags -t $DockerImg:$vers"
 
@@ -333,7 +322,11 @@ function dockerBuild {
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
   do [[ -n ${!arg} ]] && buildargs="$buildargs --build-arg $arg=${!arg}"
   done
-  _docker build $tags $buildargs $DockerDir |tee $LogFile
+  if [[ -x $DockerDir/build.sh ]]
+  then info "$ build.sh $buildargs"
+       cd $DockerDir && ./build.sh $tags $buildargs 
+  else _docker build $tags $buildargs $DockerDir |tee $LogFile
+  fi
   info "$ docker images .."
   docker images --format 'table{{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}' --filter=reference='*:[0-9]*'
 }

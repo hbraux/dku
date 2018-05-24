@@ -7,6 +7,7 @@ function _setup {
 c.NotebookApp.ip = '*'
 c.NotebookApp.token = u''
 EOF
+  # enable nbextensions
   touch .setup
 }
 
