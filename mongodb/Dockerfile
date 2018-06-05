@@ -1,7 +1,7 @@
 # JDK is needed for Restheart not for MongoDB
 FROM alpine-jdk
 
-ARG URL_DOWNLOAD=https://github.com/SoftInstigate
+ARG SITE_DOWNLOAD=https://github.com/SoftInstigate
 
 ENV MONGODB_VERSION 3.4.10
 
@@ -18,7 +18,7 @@ LABEL Usage2="docker run -it --rm --network=udn mongodb shell"
 
 RUN set -x && mkdir -p /opt && mkdir -p /data/db \
     && apk add --no-cache mongodb \
-    && curl -s ${URL_DOWNLOAD}/restheart/releases/download/${RESTHEART_VERSION}/restheart-${RESTHEART_VERSION}.tar.gz | tar xzf - -C /opt \
+    && curl -s ${SITE_DOWNLOAD}/restheart/releases/download/${RESTHEART_VERSION}/restheart-${RESTHEART_VERSION}.tar.gz | tar xzf - -C /opt \
     && mv /opt/restheart-${RESTHEART_VERSION} /opt/restheart \
     && chown -R mongodb /opt/restheart /data \
     # remove that big file

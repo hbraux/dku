@@ -1,6 +1,6 @@
 FROM alpine-jdk
 
-ARG URL_DOWNLOAD=https://artifacts.elastic.co
+ARG SITE_DOWNLOAD=https://artifacts.elastic.co
 
 ENV ELASTICSEARCH_VERSION 5.6.6
 
@@ -14,7 +14,7 @@ LABEL Usage "Docker run -d --name=elastic-server --network=udn --mount source=el
 ENV HEAP 128m
 
 RUN set -x && mkdir -p /opt /data \
-    && curl -s ${URL_DOWNLOAD}/downloads/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz | tar xzf - -C /opt \ 
+    && curl -s ${SITE_DOWNLOAD}/downloads/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz | tar xzf - -C /opt \ 
     && mv /opt/elasticsearch-${ELASTICSEARCH_VERSION} /opt/elasticsearch \
     && adduser -DH -s /sbin/nologin elastic \
     && chown -R elastic: /opt/elasticsearch /data

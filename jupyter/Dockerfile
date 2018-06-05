@@ -3,11 +3,11 @@
 FROM alpine-glibc
 
 # can be overriden to a local http cache
-ARG URL_DOWNLOAD=""
+ARG SITE_DOWNLOAD=""
 
 ARG CONDA_PACKAGES=jupyter,pandas,scikit-learn,matplotlib,plotly,numba
 
-ARG CONDA_FORGE_PACKAGES=jupyter_contrib_nbextensions
+ARG CONDA_FORGE_PACKAGES=jupyter_contrib_nbextensions,tensorflow,keras
 
 ENV LANG C.UTF-8
 
@@ -21,15 +21,16 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN set -x  \    
     && echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh \
-    && curl -s ${URL_DOWNLOAD:-https://repo.anaconda.com}/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh \
+    && curl -s ${SITE_DOWNLOAD:-https://repo.anaconda.com}/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh \
     && /bin/bash ~/miniconda.sh -b -p /opt/conda \
     && rm ~/miniconda.sh  \
-    && conda config --add channels ${URL_DOWNLOAD:-https://repo.anaconda.com}/pkgs/main \
+    && conda config --add channels ${SITE_DOWNLOAD:-https://repo.anaconda.com}/pkgs/main \
     && conda update --yes --name base conda \
     && conda install --yes ${CONDA_PACKAGES//,/ } \
     && adduser -D -h /data -s /bin/bash jupyter 
 
-RUN test -n "$CONDA_FORGE_PACKAGES" && set -x && conda config --add channels ${URL_DOWNLOAD:-https://conda.anaconda.org}/conda-forge && conda install --yes ${CONDA_FORGE_PACKAGES//,/ } || :
+RUN conda config --add channels ${SITE_DOWNLOAD:-https://conda.anaconda.org}/conda-forge \
+    && conda install --yes ${CONDA_FORGE_PACKAGES//,/ } 
 
 COPY entrypoint.sh /
 

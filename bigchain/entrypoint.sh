@@ -3,13 +3,19 @@
 function _setup {
   export BIGCHAINDB_CONFIG_PATH=/data/.bigchaindb
   if [[ ! -f .setup ]]
-  then  
-    # configure Tendermint and update chain_id
+  then 
+    # configure Tendermint 
+    mkdir -p $TMHOME/config
+    [[ -n $VALIDATOR ]] && echo $VALIDATOR >$TMHOME/config/priv_validator.json
     tendermint init 
     sed -i "s/\"chain_id\":.*/\"chain_id\":\"${CHAIN_ID}\",/" $TMHOME/config/genesis.json
     sed -i "s/\"genesis_time\":.*/\"chain_id\":\"${GENESIS_TIME}\",/" $TMHOME/config/genesis.json
-
-    sed  -i "s/addr_book_strict = true/addr_book_strict = false/" $TMHOME/config/config.toml
+    if [[ -n $VALIDATOR_KEYS  ]]
+    then 
+      for key in $(echo ${KEYRING/,/ /}) 
+      do grep -q $key $TMHOME/config/genesis.json || sed  -i "5i{\"pub_key\": {\"type\":\"AC26791624DE60\",\"value\": \"$key\"},\"power\": 10,\"name\": \"\"}," $TMHOME/config/genesis.json
+      done
+    fi
 
     # configure BigchainDB
     export BIGCHAINDB_SERVER_WORKERS=1

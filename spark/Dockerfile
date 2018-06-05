@@ -1,6 +1,6 @@
 FROM alpine-jdk:8
 
-ARG URL_DOWNLOAD=http://apache.crihan.fr
+ARG SITE_DOWNLOAD=http://apache.crihan.fr
 
 ENV SPARK_VERSION 1.6.3
 
@@ -18,7 +18,7 @@ LABEL Usage3="docker cp test.py spark:/data && docker run -it --rm -v spark:/dat
 # add python2 for pyspark
 RUN set -x && apk add --no-cache python2  libc6-compat \
     && mkdir -p /opt  \
-    && curl -s ${URL_DOWNLOAD}/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.6.tgz | tar xzf - -C /opt \
+    && curl -s ${SITE_DOWNLOAD}/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.6.tgz | tar xzf - -C /opt \
     && mv /opt/spark-${SPARK_VERSION}-bin-hadoop2.6 /opt/spark \
     && adduser -D -s /sbin/nologin spark \
     && mkdir -p /opt/spark/logs \

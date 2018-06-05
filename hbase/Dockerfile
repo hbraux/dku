@@ -1,6 +1,6 @@
 FROM alpine-jdk:8
 
-ARG URL_DOWNLOAD=http://apache.crihan.fr
+ARG SITE_DOWNLOAD=http://apache.crihan.fr
 
 ENV HBASE_VERSION 1.2.6
 
@@ -19,7 +19,7 @@ LABEL Usage2="docker run -it --rm --network=udn hbase shell"
 LABEL Warnings="JAVA API only supported on Docker's User Defined Network udn"
 
 RUN set -x && mkdir -p /opt  \
-    && curl -s ${URL_DOWNLOAD}/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 
+    && curl -s ${SITE_DOWNLOAD}/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 
     && mv /opt/hbase-${HBASE_VERSION} /opt/hbase \
     && rm -fr /opt/hbase/docs \
     && mkdir -p /opt/hbase/logs /data \

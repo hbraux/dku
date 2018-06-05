@@ -1,6 +1,6 @@
 FROM alpine-jdk:8
 
-ARG URL_DOWNLOAD=http://apache.crihan.fr
+ARG SITE_DOWNLOAD=http://apache.crihan.fr
 
 # To reduce image size only keep the Nifi Archives that are mandatory (Core) or used (Connectors)
 ARG NIFI_CORE_NARS=framework,provenance-repository,jetty-bundle-1.5.0.nar,standard,standard-services-api,ssl-context-service,enrich,record-serialization-services,update-attribute,avro,kite
@@ -16,7 +16,7 @@ LABEL Description="Nifi ${NIFI_VERSION} light server"
 LABEL Usage="docker run -d --name=nifi -h nifi --network=udn -p 8080:8080 nifi start"
 
 RUN set -x && mkdir -p /opt /data \
-    && curl -s ${URL_DOWNLOAD}/dist/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.tar.gz | tar xzf - -C /opt \
+    && curl -s ${SITE_DOWNLOAD}/dist/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.tar.gz | tar xzf - -C /opt \
     && mv /opt/nifi-${NIFI_VERSION} /opt/nifi \
     && adduser -D -s /sbin/nologin nifi \
     && chown -R nifi: /opt/nifi /data \

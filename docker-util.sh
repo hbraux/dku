@@ -226,7 +226,8 @@ Options:
   -v : verbose
 
 commands:
- s|status          : docker status
+ status            : docker status (default if no command provided)
+ help              : show this message
  b|build <image>   : build an image
  [run]   <image>...: run an image (run is optional)
  stop    <image>   : stop  image
@@ -301,7 +302,7 @@ function dockerBuild {
   if [[ -n $id ]]
   then warn "Image $DockerImg [$id] already built"
        opt f || return
-       _docker rmi -f $id
+       docker rmi -f  $id
   fi
   egrep -q '^VOLUME \[' $DockerDir/Dockerfile && die "$TOOL_NAME does not support VOLUME in JSON format"
   vers=$(egrep -i "^ENV ${DockerImg/alpine-}[A-Z]*_VERSION" $DockerDir/Dockerfile | awk '{print $3}')
@@ -486,7 +487,10 @@ function dockerCopy {
 # ------------------------------------------
 
 # analyse command line
-init -fv $@
+if [[ $# -eq 0 ]]
+then init -fv status
+else init -fv $@
+fi
 
 case $Command in
   help)     usage;;
@@ -498,7 +502,7 @@ case $Command in
   l|logs)   getDockerImg $Arguments; dockerLogs;;
   i|info)   getDockerImg $Arguments; dockerInfo;;
   copy)     getDockerImg $Arguments; dockerCopy;;
-  s|status) dockerStatus;;
+  status)   dockerStatus;;
   clean)    dockerClean ;;
   *) getDockerImg $Command; dockerRun $Arguments;;
 esac

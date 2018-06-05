@@ -7,11 +7,11 @@
 
 FROM alpine:3.7
 
-ARG URL_DOWNLOAD=https://github.com/sgerrand
+ARG SITE_DOWNLOAD=https://github.com/sgerrand
 
 ENV GLIBC_VERSION 2.27-r0
 
-ENV URL_GLIBC ${URL_DOWNLOAD}/alpine-pkg-glibc/releases/download
+ENV URL_GLIBC ${SITE_DOWNLOAD}/alpine-pkg-glibc/releases/download
 
 ENV LANG=C.UTF-8
 
