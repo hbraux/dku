@@ -2,7 +2,7 @@
 # A docker helper to build, run and manage Docker images
 
 TOOL_NAME=docker-util
-TOOL_VERS=0.0.5
+TOOL_VERS=0.0.6
 
 ###############################################################################
 # BEGIN: common.sh 2.3
@@ -43,7 +43,7 @@ declare Arguments=
 # -----------------------------------------------------------------------------
 
 # file cheksum, updated when commiting in Git
-_MD5SUM="c5aab26a3b0714c329670a7a5991c6e5"
+_MD5SUM="5cfd3ff612ff81102d25defccf960d9b"
 
 # config file
 declare _CfgFile=$(dirname $0)/.${TOOL_NAME}.cfg
@@ -354,7 +354,7 @@ function dockerRun {
 	  if [[ $? -ne 0 ]]
 	  then opts="$opts -p $port:$port"
 	  else
-	    for ev in $(egrep '^ENV ' $DockerDir/Dockerfile | awk '{print "port=${port/\\$\\{" $2 "\\}/" $3 "}" }')
+	    for ev in $(egrep '^ENV .*PORT' $DockerDir/Dockerfile | awk '{print "port=${port/\\$\\{" $2 "\\}/" $3 "}" }')
 	    do eval $ev
             done
 	    # echo "DEBUG: port=$port"
