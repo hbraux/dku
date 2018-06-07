@@ -4,10 +4,13 @@ ARG SITE_DOWNLOAD=https://artifacts.elastic.co
 
 ENV ELASTICSEARCH_VERSION 5.6.6
 
+# supported values: low, default, or a size
+ENV HEAP low
+
 ENV CLUSTER_NAME test
 
 LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} light Server"
-LABEL Usage "docker run -d --name=elastic --network=udn --mount source=elastic,target=/data -p 9200:9200 -p 9300:9300 elastic start"
+LABEL Usage "docker run -d --name=elastic --network=udn --mount source=elastic,target=/data -p 9200:9200 elastic start"
 
 
 # Heap size
@@ -26,7 +29,8 @@ WORKDIR /opt/elasticsearch
 
 USER elastic
 
-EXPOSE 9200 9300
+# just publish the HTTP port
+EXPOSE 9200
 
 VOLUME /data
 

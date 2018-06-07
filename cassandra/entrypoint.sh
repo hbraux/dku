@@ -3,30 +3,27 @@
 function _setup {
   [[ -f .setup ]] && return
 
-  cfgfile=/opt/cassandra/conf/cassandra.yaml
+  cfgfile=conf/cassandra.yaml
   cat>>$cfgfile<<EOF
 data_file_directories:
    - /data
 EOF
   ip=$(hostname -i)
-  sed -i "s/rpc_address: localhost/rpc_address: $ip/" $cfgfile
-  sed -i "s/broadcast_rpc_address:localhost/broadcast_rpc_address: $ip/" $cfgfile
-  sed -i "s/listen_address: localhost/listen_address: $ip/" $cfgfile
-  sed -i "s/seeds: \"127.0.0.1\"/seeds: \"$ip\"/" $cfgfile
+  sed -i "s/rpc_address:.*/rpc_address: $ip/;s/broadcast_rpc_address:.*/broadcast_rpc_address: $ip/;s/listen_address:.*/listen_address: $ip/" $cfgfile
+  sed -i "s/seeds:.*/seeds: \"$ip\"/" $cfgfile
+
+  [[ $HEAP == low ]] && HEAPSIZE=128m
+  egrep -q '[0-9]+[kmg]'<<<$HEAP && HEAPSIZE=$HEAP
+  [[ -n $HEAPSIZE ]] && cat>>conf/jvm.options<<EOF
+-Xms$HEAPSIZE
+-Xmx$HEAPSIZE
+EOF
 
   touch .setup
 }
 
 function _start {
   _setup
-
-  [[ $HEAP == low ]] && HEAPSIZE=128m
-  egrep -q '[0-9]+[kmg]'<<<$HEAP && HEAPSIZE=$HEAP
-  [[ -n $HEAPSIZE ]] && cat>>/opt/cassandra/conf/jvm.options<<EOF
--Xms$HEAPSIZE
--Xmx$HEAPSIZE
-EOF
-
   exec bin/cassandra -f
 }
 

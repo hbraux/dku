@@ -4,6 +4,9 @@ ARG SITE_DOWNLOAD=http://artifacts.elastic.co
 
 ENV LOGSTASH_VERSION 5.6.6
 
+# supported values: low, default, or a size
+ENV HEAP low
+
 # Logstash configuration can be overriden by those variables
 ENV LOGSTASH_INDEX logstash
 ENV LOGSTASH_TARGET http://elastic:9200

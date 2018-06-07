@@ -8,8 +8,8 @@ and usage(s):
 docker inspect --format='{{range $k,$v:=.Config.Labels}}{{$k}}: {{println $v}}{{end}}' hbase
 ```
 
-The included script `docker-util.sh` provides somes helpers to build, run and
-manage Docker images 
+The included script `docker-util.sh` provides somes helpers to build, run, test
+and manage Docker images (alias dku=".../docker-util.sh")
 
 
 ## Image List
@@ -22,12 +22,13 @@ hbase        | 162MB | HBase 1.2.6 standalone server with Rest API (300MB)
 kafka        | 118MB | Kafka 0.10 standalone server (250MB)
 spark        | 310MB | Spark 1.6.0 standalone server 
 elastic      | 116MB | Elasticsearch 5.6 standalone server (300MB)
+logstash     | 270MB | Logstash 5.6 server
 mongodb      | 192MB | MongoDB 3.4.10 with Restheart (80 MB)
 rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
 jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
-nifi         | 350MB | NiFi 1.5.0 slim server
-cassandra    | 155MB | Cassandra 3.11.2 standalone serve
-bigchaindb   | 420MB | BigchainDB
+nifi         | 350MB | NiFi 1.5.0 slim server 
+cassandra    | 155MB | Cassandra 3.11.2 server (300MB)
+bigchaindb   | 470MB | BigchainDB standalone server incl. MongoDB and Tendermint
 
 ## TODO list
 * HBase support of Java Client (issue of dynamic ports)
