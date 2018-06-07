@@ -6,8 +6,8 @@ ENV ELASTICSEARCH_VERSION 5.6.6
 
 ENV CLUSTER_NAME test
 
-LABEL Description Elasticsearch ${ELASTICSEARCH_VERSION} light Server 
-LABEL Usage "Docker run -d --name=elastic-server --network=udn --mount source=elastic,target=/data -p 9200:9200 -p 9300:9300 elasticstart"
+LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} light Server"
+LABEL Usage "docker run -d --name=elastic --network=udn --mount source=elastic,target=/data -p 9200:9200 -p 9300:9300 elastic start"
 
 
 # Heap size
