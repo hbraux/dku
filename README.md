@@ -26,6 +26,7 @@ mongodb      | 192MB | MongoDB 3.4.10 with Restheart (80 MB)
 rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
 jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
 nifi         | 350MB | NiFi 1.5.0 slim server
+cassandra    | 155MB | Cassandra 3.11.2 standalone serve
 bigchaindb   | 420MB | BigchainDB
 
 ## TODO list

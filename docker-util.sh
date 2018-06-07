@@ -231,7 +231,7 @@ commands:
  b|build <image>   : build an image
  [run]   <image>...: run an image (run is optional)
  stop    <image>   : stop  image
- rm      <image>   : remove a docker container (stop it if needed)
+ destroy <image>   : stop and remove a container
  test    <image>   : test a docker image
  l|logs  <image>   : docker logs
  i|info  <image>   : image's info
@@ -388,7 +388,7 @@ function dockerStop {
 }
 
 
-function dockerRm {
+function dockerDestroy {
   id=$(docker ps  -a | grep "${DockerContainer}\$" | awk '{print $1}')
   if [[ -z $id ]]
   then warn "No container ${DockerContainer}"
@@ -431,7 +431,7 @@ function dockerClean {
 function dockerTest {
   testfile=$DockerDir/test-server.sh
   [[ -f $testfile ]] || die "No file $testfile"
-  dockerRm 
+  dockerDestroy 
   dockerBuild
   dockerInfo
   info "\nStarting $DockerImg\n------------------------------------------"
@@ -458,7 +458,7 @@ function dockerTest {
        sleep 5
        DockerTty=0 source $testfile  || die
   fi
-  dockerRm
+  dockerDestroy
   info "\nTESTING OK"
 }
 
@@ -496,7 +496,7 @@ case $Command in
   help)     usage;;
   b|build)  getDockerImg $Arguments; dockerBuild;;
   run)      getDockerImg $Arguments; dockerRun ${Arguments/$DockerImg/};;
-  rm)       getDockerImg $Arguments; dockerRm;;
+  destroy)  getDockerImg $Arguments; dockerDestroy;;
   stop)     getDockerImg $Arguments; dockerStop;;
   test)     getDockerImg $Arguments; dockerTest;;
   l|logs)   getDockerImg $Arguments; dockerLogs;;
