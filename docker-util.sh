@@ -366,6 +366,8 @@ function dockerRun {
        done
        # WA for NIFI-4761
        [[ $DockerImg == nifi ]] && opts="$opts -h nifi"
+       # Check for addtional @RUNOPTS@ 
+       grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
        args=start
   else # command mode
        opts="-i --rm --network=$DOCKER_NETWORK"

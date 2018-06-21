@@ -24,9 +24,3 @@ EXPOSE 28015 29015
 EXPOSE ${WEBUI_PORT}
 
 ENTRYPOINT exec rethinkdb --bind all -d /data -n ${SERVER_NAME} --http-port ${WEBUI_PORT} --server-tag ${SERVER_TAG} --no-update-check
-
-
-
-
-
-
