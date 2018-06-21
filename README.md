@@ -28,7 +28,7 @@ rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
 jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
 nifi         | 350MB | NiFi 1.5.0 slim server 
 cassandra    | 155MB | Cassandra 3.11.2 server (300MB)
-systemd      | 70 MB | CentOS 7 container with systemd  and sshd
+systemd      | 270MB | CentOS 7 container with systemd  and sshd (user ansible)
 bigchaindb   | 470MB | BigchainDB standalone server incl. MongoDB and Tendermint
 
 ## TODO list
