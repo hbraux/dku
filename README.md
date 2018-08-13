@@ -2,6 +2,8 @@
 A set of slim docker images based on Alpine Linux with low memory requirements.
 To be used for testing or development purpose, for instance on a Virtualbox VM
 
+The images do NOT support services and docker-compose. They arge designed to run in standalone mode
+
 All images are auto-descriptive. Just inspect the labels to get description
 and usage(s):
 ```sh

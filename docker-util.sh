@@ -373,7 +373,7 @@ function dockerRun {
        fi
        # Check for addtional @RUNOPTS@ 
        grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
-       args=start
+       args=""
   else # command mode
        opts="-i --rm --network=$DOCKER_NETWORK"
        if [[ $DockerMount -eq 1 ]] 
@@ -453,7 +453,7 @@ function dockerTest {
   fi
   # execute test file
   info "\nTesting $DockerImg health\n------------------------------------------"
-  DockerTty=0 DockerMount=1 source $testfile |& tee $TmpFile || die
+  DockerTty=0 DockerMount=0 source $testfile |& tee $TmpFile || die
   grep -qi "exception \|error " $TmpFile
   [[ $? -eq 0 ]] && die 
   # check persistence (volume)

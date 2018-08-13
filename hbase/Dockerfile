@@ -8,13 +8,10 @@ ENV HBASE_VERSION 1.2.6
 ENV HEAP low
 
 # Server Name (required by CLI)
-ENV SERVER_NAME hbase
-
-# Rest API Port
-ENV REST_PORT 16000
+ENV VIRTUAL_HOST hbase
 
 LABEL Description="HBase ${HBASE_VERSION} light server with Rest API"
-LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mount source=hbase,target=/data -p ${REST_PORT}:${REST_PORT} -p 16010:16010 hbase start "
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mount source=hbase,target=/data  -p 8080 hbase"
 LABEL Usage2="docker run -it --rm --network=udn hbase shell"
 LABEL Warnings="JAVA API only supported on Docker's User Defined Network udn"
 
@@ -32,11 +29,11 @@ WORKDIR /opt/hbase
 
 USER hbase
 
-# Zookeeper (needed for hbase shell)
-EXPOSE 2181
+# Rest API 
+EXPOSE 8080
 
-# Rest API (changeable)
-EXPOSE ${REST_PORT}
+# Zookeeper 
+EXPOSE 2181
 
 # Master web UI 
 EXPOSE 16010
