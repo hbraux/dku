@@ -26,8 +26,8 @@ EOF
   mkdir -p /data/pub
   chmod 777 /data/pub
 
-  sed -i "s/^Listen 80/Listen ${HTTP_PORT}/" /etc/apache2/httpd.conf
-  echo "ServerName $HOST_ADDRESS" >>/etc/apache2/httpd.conf
+  sed -i "s~listen *80 default_server;~listen ${HTTP_PORT} default_server;\n root /data;\nautoindex on;~" /etc/nginx/conf.d/default.conf
+  sed -i "s~return 404;~~" /etc/nginx/conf.d/default.conf
 cat<<EOF>/data/index.html
 <html>
 <body>
@@ -41,21 +41,17 @@ cat<<EOF>/data/index.html
 </body>
 </html>
 EOF
-  # change root directory and user of httpd
-  sed -i 's#/var/www/localhost/htdocs#/data#g' /etc/apache2/httpd.conf
-  # sed -i 's#User apache#User ftp#g' /etc/apache2/httpd.conf
-  mkdir /run/apache2
+  mkdir -p /run/nginx && chown 777 /run/nginx
   touch .setup
 }
 
-#export -f _setup
 
 function _start {
-  _setup
   vsftpd /etc/vsftpd/vsftpd.conf &
-  exec httpd -DFOREGROUND
+  exec nginx  -g 'daemon off;'
 }
 
+_setup
 
 case $1 in
   start) _start;;

@@ -346,11 +346,17 @@ function dockerRun {
             fi
 	    return
        fi
-       opts="-d --name=${DockerContainer} --network=$DOCKER_NETWORK"
-       volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
-       [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
-       for port in $(egrep '^EXPOSE ' $DockerDir/Dockerfile | cut -c 8-)
-       do grep -q '[$]' <<<$port
+       # first check for usage in label
+       opts=$(dockerInfo | grep Usage: | sed -e "s/Usage: docker run //;s/ ${DockerImg}\$//" )
+       if [[ -n $opts ]]
+       then
+         opts=$(eval echo $opts)
+       else
+         opts="-d --name=${DockerContainer} --network=$DOCKER_NETWORK"
+         volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
+         [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
+         for port in $(egrep '^EXPOSE ' $DockerDir/Dockerfile | cut -c 8-)
+         do grep -q '[$]' <<<$port
 	  if [[ $? -ne 0 ]]
 	  then opts="$opts -p $port:$port"
 	  else
@@ -360,10 +366,11 @@ function dockerRun {
 	    # echo "DEBUG: port=$port"
 	    opts="$opts -p $port:$port"
 	  fi
-       done
-       for e in $(env | egrep '^[A-Z_]*=' | egrep -v '^PATH=' | cut -d= -f1)
-       do egrep -q "^ENV $e " $DockerDir/Dockerfile && opts="$opts -e $e=${!e}"
-       done
+         done
+         for e in $(env | egrep '^[A-Z_]*=' | egrep -v '^PATH=' | cut -d= -f1)
+         do egrep -q "^ENV $e " $DockerDir/Dockerfile && opts="$opts -e $e=${!e}"
+         done
+       fi
        # Check for addtional @RUNOPTS@ 
        grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
        args=start
@@ -433,6 +440,7 @@ function dockerTest {
   [[ -f $testfile ]] || die "No file $testfile"
   dockerDestroy 
   dockerBuild
+  info "\nInfo about $DockerImg\n------------------------------------------"
   dockerInfo
   info "\nStarting $DockerImg\n------------------------------------------"
   dockerRun
