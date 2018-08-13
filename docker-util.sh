@@ -364,8 +364,6 @@ function dockerRun {
        for e in $(env | egrep '^[A-Z_]*=' | egrep -v '^PATH=' | cut -d= -f1)
        do egrep -q "^ENV $e " $DockerDir/Dockerfile && opts="$opts -e $e=${!e}"
        done
-       # WA for NIFI-4761
-       [[ $DockerImg == nifi ]] && opts="$opts -h nifi"
        # Check for addtional @RUNOPTS@ 
        grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
        args=start
