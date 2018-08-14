@@ -4,7 +4,7 @@ function _setup {
   [[ -f .setup ]] && return
   (cat>etc/rest.yml)<<EOF
 http-listener: true
-http-port: ${REST_PORT}
+http-port: ${VIRTUAL_PORT}
 https-listener: false
 connection-options:
     MAX_HEADER_SIZE: 104857
@@ -21,7 +21,7 @@ function _start {
 
 case $1 in
   start)  _start;;
-  shell)  exec mongo --host ${SERVER_NAME};;
+  shell)  exec mongo --host ${VIRTUAL_HOST};;
   *)      exec $@;;
 esac
 

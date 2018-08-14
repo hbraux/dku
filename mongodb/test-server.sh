@@ -6,7 +6,7 @@ EOF
 
 # Check Restheart status
 echo "REST API:"
-curl -s http://$DOCKER_HOST:27000/test/clients/10002
+dockerRun curl -s http://mongodb:8080/test/clients/10002
 
 
 

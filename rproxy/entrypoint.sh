@@ -2,18 +2,17 @@
 
 function _setup {
   [[ -f .setup ]] && return
-
+  sed -i "s/%DOMAIN%/${DOMAIN}/g" /etc/nginx/nginx.tmpl
   touch .setup
 }
 
-#export -f _setup
 
 function _start {
-  _setup
-  exec nginx  -g "daemon off;"
-
+  nginx
+  docker-gen -watch -notify "nginx -s reload" -only-published /etc/nginx/nginx.tmpl /etc/nginx/conf.d/default.conf 
 }
 
+_setup
 
 case $1 in
   start) _start;;

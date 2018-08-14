@@ -11,6 +11,10 @@ function _setup {
   <name>hbase.rootdir</name>
   <value>file:////data</value>
  </property>
+ <property>
+  <name>hbase.rest.port</name>
+  <value>${VIRTUAL_PORT}</value>
+ </property>
 </configuration>
 EOF
   touch .setup

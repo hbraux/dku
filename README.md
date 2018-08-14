@@ -20,6 +20,7 @@ Name | Size | Description and RAM consumption
 ---- | ---- | ----
 alpine-jdk   | 80MB  | base image with Open-JDK 8 and bash
 alpine-glibc | 30MB  | base image with prerequisites for Conda installation
+rproxy       [ 17MB  | a Reverse Proxy Server based on Nginx and docker-gen 
 hbase        | 162MB | HBase 1.2.6 standalone server with Rest API (300MB)
 kafka        | 118MB | Kafka 0.10 standalone server (250MB)
 spark        | 310MB | Spark 1.6.0 standalone server 

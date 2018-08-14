@@ -7,13 +7,12 @@ ENV MONGODB_VERSION 3.4.10
 
 ENV RESTHEART_VERSION 3.2.2
 
-ENV SERVER_NAME mongodb
-
-# RestHeart Port
-ENV REST_PORT 27000
+# Server Name and Port (used by reverse proxy to expose REST API)
+ENV VIRTUAL_HOST mongodb
+ENV VIRTUAL_PORT 8080
 
 LABEL Description="MongoDB ${MONGODB_VERSION} light server with RestHeart"
-LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn -p 27017:27017 -p ${REST_PORT}:${REST_PORT} mongodb start"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn -p ${VIRTUAL_PORT} mongodb"
 LABEL Usage2="docker run -it --rm --network=udn mongodb shell"
 
 RUN set -x && mkdir -p /opt && mkdir -p /data/db \
@@ -35,7 +34,8 @@ VOLUME /data
 # Mongo DB Port
 EXPOSE 27017
 
-EXPOSE ${REST_PORT}
+# Restheart API
+EXPOSE ${VIRTUAL_PORT}
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
