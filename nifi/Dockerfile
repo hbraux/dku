@@ -13,12 +13,15 @@ ARG NIFI_EXTRA_INCLUDES=hadoop,hadoop-libraries,hbase,hbase_1_1_2-client-service
 ARG DRIVERS="none"
 
 ENV NIFI_VERSION 1.7.1
-ENV NIFI_PORT 9090
 ENV HEAP_SIZE 256m
-ENV SERVER_NAME nifi
+
+# Server Name and Port (used by reverse proxy to expose API)
+ENV VIRTUAL_HOST nifi
+ENV VIRTUAL_PORT 8080
+
 
 LABEL Description="Nifi ${NIFI_VERSION} light server"
-LABEL Usage="docker run -d --name=${SERVER_NAME} --mount source=nifi,target=/data -p ${NIFI_PORT}:${NIFI_PORT} nifi"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=nifi,target=/data -p ${VIRTUAL_PORT} nifi"
 
 RUN set -x && mkdir -p /opt /data \
     && curl -s ${SITE_DOWNLOAD}/dist/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.tar.gz | tar xzf - -C /opt \
@@ -36,7 +39,7 @@ WORKDIR /opt/nifi
 
 USER nifi
 
-EXPOSE ${NIFI_PORT}
+EXPOSE ${VIRTUAL_PORT}
 
 VOLUME /data
 

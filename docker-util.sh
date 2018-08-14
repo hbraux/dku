@@ -268,7 +268,7 @@ function dockerCheck {
   [[ -n $DOCKER_HOST ]] || die "DOCKER_HOST not defined"
   ping -c1 $DOCKER_HOST >/dev/null 2>&1
   [[ $? -eq 0 ]] || die "Docker host $DOCKER_HOST not reachable"
-  egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
+  # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
   _docker network ls | grep -q $DOCKER_NETWORK 
   [[ $? -eq 0 ]] || _docker network create --driver bridge $DOCKER_NETWORK || die
 

@@ -5,7 +5,7 @@ function _setup {
   # move all repo to /data as well as flows
   sed -i -e 's~=./\([a-z]*\)_repository~=/data/\1_repository~g' conf/nifi.properties
   sed -i -e 's~=./conf/flow.xml.gz~=/data/conf/flow.xml.gz~' conf/nifi.properties
-  sed -i -e "s/nifi.web.http.port=.*/nifi.web.http.port=${NIFI_PORT}/" conf/nifi.properties
+  sed -i -e "s/nifi.web.http.port=.*/nifi.web.http.port=${VIRTUAL_PORT}/" conf/nifi.properties
   sed -i -e "s/nifi.sensitive.props.key=.*/nifi.sensitive.props.key=password/" conf/nifi.properties
 
   HEAP_SIZE=${HEAP_SIZE:-512m}

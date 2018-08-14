@@ -9,8 +9,12 @@ ENV HEAP low
 
 ENV CLUSTER_NAME test
 
-LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} light Server"
-LABEL Usage "docker run -d --name=elastic --network=udn --mount source=elastic,target=/data -p 9200:9200 elastic start"
+# Server Name and Port (used by reverse proxy to expose REST API)
+ENV VIRTUAL_HOST elastic
+ENV VIRTUAL_PORT 9200
+
+LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} standalone Server"
+LABEL Usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} elastic"
 
 
 # Heap size
@@ -29,13 +33,13 @@ WORKDIR /opt/elasticsearch
 
 USER elastic
 
-# just publish the HTTP port
-EXPOSE 9200
+# HTTP port
+EXPOSE ${VIRTUAL_PORT}
 
 VOLUME /data
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-CMD ["help"]
+CMD ["start"]
 
 

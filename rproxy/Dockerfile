@@ -21,6 +21,8 @@ COPY nginx.tmpl /etc/nginx/
 
 EXPOSE 80
 
+VOLUME "/var/run/docker.sock"
+
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["start"]
