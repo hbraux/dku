@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine
 
 ENV JDK_VERSION 8
 
@@ -9,8 +9,9 @@ ENV LANG C.UTF-8
 ENV JAVA_HOME /usr/lib/jvm/java-1.8-openjdk
 ENV PATH $PATH:$JAVA_HOME/bin
 
-RUN apk update && apk add --no-cache bash ca-certificates curl libc6-compat openjdk8-jre-base=8.151.12-r0 \
-    && rm -rf /var/cache/apk/*  \
-    # remove useless Bash terms
+# also install curl and bash 8.151.12-r0
+
+RUN apk add --no-cache bash ca-certificates curl libc6-compat openjdk8-jre-base \
+    # remove useless Bash terms to reduce image size to minimal
     && cd /usr/share/terminfo && ls | grep -v 'xterm$' | xargs rm -fr
 

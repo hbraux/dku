@@ -1,44 +1,45 @@
-# A Python3 miniconda environment with Jupyter server
+# using a multi-stage build to reduce the final image size
 
-FROM alpine-glibc
+FROM pybuild
 
-# can be overriden to a local http cache
-ARG SITE_DOWNLOAD=""
+# ARG MIRROR_PYPI=""
+# RUN if [ -n "${MIRROR_PYPI}" ]; then pip config set global.index-url ${MIRROR_PYPI}/simple ; pip config set global.index ${MIRROR_PYPI}/pypi; fi 
 
-ARG CONDA_PACKAGES=jupyter,pandas,scikit-learn,matplotlib,plotly,numba
+RUN pip install numpy
+RUN pip install --no-build-isolation pandas # https://github.com/pypa/pip/issues/5299
+RUN pip install jupyter
 
-ARG CONDA_FORGE_PACKAGES=jupyter_contrib_nbextensions,tensorflow,keras
+# cleanup the tests directories and strip the binaries
+RUN find /usr/lib/python${PYTHON_VERSION}/ -name 'tests' -exec rm -r '{}' + \
+    && find /usr/lib/python${PYTHON_VERSION}/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \; 
 
-ENV LANG C.UTF-8
+FROM python
 
-ENV JUPYTER_VERSION 4.4
-ENV CONDA_VERSION 4.5.1
+# adding C libs
+RUN apk add libstdc++ openblas
 
-LABEL Description="Conda/Jupyter Server $JUPYTER_VERSION"
-LABEL Usage="docker run -d --name=jupyter --network=udn --mount source=jupyter,target=/data -p 8888:8888 jupyter start"
+ENV JUPYTER_VERSION 5
 
-ENV PATH /opt/conda/bin:$PATH
+# Server Name and Port (used by reverse proxy to expose UI)
+ENV VIRTUAL_HOST jupyter
+ENV VIRTUAL_PORT 8888
 
-RUN set -x  \    
-    && echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh \
-    && curl -s ${SITE_DOWNLOAD:-https://repo.anaconda.com}/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -o ~/miniconda.sh \
-    && /bin/bash ~/miniconda.sh -b -p /opt/conda \
-    && rm ~/miniconda.sh  \
-    && conda config --add channels ${SITE_DOWNLOAD:-https://repo.anaconda.com}/pkgs/main \
-    && conda update --yes --name base conda \
-    && conda install --yes ${CONDA_PACKAGES//,/ } \
-    && adduser -D -h /data -s /bin/bash jupyter 
+LABEL Description="Jupyter Server $JUPYTER_VERSION"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=jupyter,target=/data -p ${VIRTUAL_PORT} jupyter"
 
-RUN conda config --add channels ${SITE_DOWNLOAD:-https://conda.anaconda.org}/conda-forge \
-    && conda install --yes ${CONDA_FORGE_PACKAGES//,/ } 
-
+COPY --from=0 /usr/lib/python${PYTHON_VERSION} /usr/lib/python${PYTHON_VERSION}
+COPY --from=0 /usr/bin/jupyter* /usr/bin/
+COPY --from=0 /usr/share/jupyter /usr/share/jupyter
+COPY --from=0 /usr/etc/jupyter /usr/etc/jupyter
 COPY entrypoint.sh /
+
+RUN adduser -DH -s /sbin/nologin jupyter
 
 USER jupyter
 
 WORKDIR /data
 
-EXPOSE 8888
+EXPOSE ${VIRTUAL_PORT}
 
 VOLUME /data
 

@@ -1,4 +1,4 @@
-FROM alpine-jdk:8
+FROM alpine-jdk
 
 ARG SITE_DOWNLOAD=http://artfiles.org/apache.org
 

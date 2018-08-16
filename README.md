@@ -19,7 +19,6 @@ and manage Docker images (alias dku=".../docker-util.sh")
 Name | Size | Description and RAM consumption
 ---- | ---- | ----
 alpine-jdk   | 80MB  | base image with Open-JDK 8 and bash
-alpine-glibc | 30MB  | base image with prerequisites for Conda installation
 rproxy       [ 17MB  | a Reverse Proxy Server based on Nginx and docker-gen 
 hbase        | 162MB | HBase 1.2.6 standalone server with Rest API (300MB)
 kafka        | 118MB | Kafka 0.10 standalone server (250MB)
@@ -28,11 +27,12 @@ elastic      | 116MB | Elasticsearch 5.6 standalone server (300MB)
 logstash     | 270MB | Logstash 5.6 server
 mongodb      | 192MB | MongoDB 3.4.10 with Restheart (80 MB)
 rethinkdb    | 50MB  | RethinkDB 2.3.6 (20MB)
-jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
 nifi         | 360MB | NiFi 1.7.1 slim server 
 cassandra    | 155MB | Cassandra 3.11.2 server (300MB)
 systemd      | 270MB | CentOS 7 container with systemd  and sshd (user ansible)
 bigchaindb   | 470MB | BigchainDB standalone server incl. MongoDB and Tendermint
+python       | 60MB  | A minimal python3 image
+jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
 
 ## TODO list
 * HBase support of Java Client (issue of dynamic ports)

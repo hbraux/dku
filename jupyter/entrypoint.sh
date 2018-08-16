@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function _setup {
   [[ -f .setup ]] && return
@@ -13,7 +13,7 @@ EOF
 
 function _start {
   _setup
-  exec jupyter notebook --no-browser
+  exec jupyter-notebook --no-browser
 }
 
 case $1 in
