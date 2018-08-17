@@ -3,12 +3,14 @@
 # using a multi-stage build 
 FROM pybuilder as builder
 
+ARG ML_LIBS="scipy scikit-learn"
+
 RUN pip install cryptography requests # basic packages
 RUN pip install numpy
-RUN pip install scipy scikit-learn #  ML
 RUN pip install --no-build-isolation pandas # https://github.com/pypa/pip/issues/5299
 RUN pip install jupyter 
 RUN pip install matplotlib plotly # plotting
+RUN if [ ${ML_LIBS} != "none" ]; then pip install ${ML_LIBS} ; fi
 
 # cleanup the tests directories and strip the binaries
 RUN find /usr/lib/python${PYTHON_VERSION}/ -name 'tests' -exec rm -r '{}' + \
