@@ -32,7 +32,7 @@ cassandra    | 155MB | Cassandra 3.11.2 server (300MB)
 systemd      | 270MB | CentOS 7 container with systemd  and sshd (user ansible)
 bigchaindb   | 470MB | BigchainDB standalone server incl. MongoDB and Tendermint
 python       | 60MB  | A minimal python3 image
-jupyter      | 2.3GB | Conda Jupyter Server with main datascience libs
+jupyter      | 450MB | A Jupyter Server with ML libs 
 
 ## TODO list
 * HBase support of Java Client (issue of dynamic ports)
