@@ -17,7 +17,7 @@ and manage Docker images (alias dku=".../docker-util.sh")
 
 Name | Size | Description and RAM consumption
 ---- | ---- | ----
-alpine-jdk   | 80MB  | base image with Open-JDK 8 and bash
+alpine-jdk   | 80MB  | base alpine image with Open-JDK 8 and bash
 rproxy       [ 17MB  | a Reverse Proxy Server based on Nginx and docker-gen 
 hbase        | 162MB | HBase 1.2.6 standalone server with Rest API (300MB)
 kafka        | 118MB | Kafka 0.10 standalone server (250MB)
