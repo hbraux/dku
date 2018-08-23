@@ -302,7 +302,7 @@ function dockerBuild {
   if [[ -n $id ]]
   then warn "Image $DockerImg [$id] already built"
        opt f || return
-       docker rmi -f  $id
+       docker rmi -f --no-prune  $id
   fi
   egrep -q '^VOLUME \[' $DockerDir/Dockerfile && die "$TOOL_NAME does not support VOLUME in JSON format"
   vers=$(egrep -i "^ENV ${DockerImg/alpine-}[A-Z]*_VERSION" $DockerDir/Dockerfile | awk '{print $3}')

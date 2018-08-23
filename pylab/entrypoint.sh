@@ -2,7 +2,16 @@
 
 function _setup {
   [[ -f .setup ]] && return
-  # [[ -n ${PYPI_PACKAGES} ]] && pip install ${PYPI_PACKAGES/,/ }
+
+  if [[ -n ${MIRROR_PYPI} ]]; then 
+    pip config set global.index-url ${MIRROR_PYPI}/simple
+    pip config set global.extra-index-url https://pypi.python.org/pypi
+  fi
+
+  if [[ -n ${RUN_PACKAGES} ]]; then
+    pip install ${RUN_PACKAGES/,/ }
+  fi
+
   mkdir .jupyter
   cat >.jupyter/jupyter_notebook_config.py <<EOF 
 c.NotebookApp.ip = '*'
@@ -30,9 +39,10 @@ EOF
 }
 
 function _start {
-  _setup
   su-exec jupyter jupyter-notebook --no-browser
 }
+
+_setup
 
 case $1 in
   start) _start;;

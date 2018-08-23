@@ -20,10 +20,13 @@ RUN apk --update --virtual build-dependencies add alpine-sdk git diffutils build
     && mkdir -p $TARGET_DIR \
     && cp /home/apk/.abuild/*.rsa.pub $TARGET_DIR \
     && cp /home/apk/packages/main/$(uname -m)/*.apk $TARGET_DIR \
+    && rm $TARGET_DIR/llvm6-static* && rm $TARGET_DIR/llvm6-test* \
     && deluser --remove-home apk \
     && apk del build-dependencies
 
-RUN ls -l $TARGET_DIR
+
+
+
 
 
 

@@ -39,7 +39,7 @@ ENV PYPI_PACKAGES avro
 LABEL Description="Jupyter Server $JUPYTER_VERSION"
 LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
 
-RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi libxml2 openssl ffmpeg git jq su-exec \
+RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi libxml2 openssl git jq su-exec \
     && cd /usr/bin && ln -fs python3 python \
     && adduser -D -h /data jupyter
 
@@ -47,6 +47,7 @@ RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi libxml2
 COPY --from=builder /usr/lib/python${PYTHON_VERSION} /usr/lib/python${PYTHON_VERSION}
 COPY --from=builder /usr/lib/libLLVM-6.0.so /usr/lib/
 COPY --from=builder /usr/bin/pip* /usr/bin/
+COPY --from=builder /usr/bin/ffmpeg /usr/bin/
 COPY --from=builder /usr/bin/jupyter* /usr/bin/
 COPY --from=builder /usr/share/jupyter /usr/share/jupyter
 COPY --from=builder /usr/etc/jupyter /usr/etc/jupyter
