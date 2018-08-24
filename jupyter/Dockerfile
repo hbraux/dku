@@ -39,18 +39,18 @@ RUN find /usr/lib/python${PYTHON_VERSION}/ -name 'tests' -exec rm -r '{}' + \
 # this is the main image
 FROM alpine
 
-# Versions
-ENV JUPYTER_VERSION 4.0
+# Versions (determined by alpine repo)
+ENV JUPYTER_VERSION 4.4
 ENV PYTHON_VERSION 3.6
 
 # A PYPI mirror can be set at run time
-ENV MIRROR_PYPI ""
+ENV PYPI_MIRROR ""
 
-# additional packages to install at start time (comma separated list) without any compilation!
-ENV RUN_PACKAGES plotly
+# additional packages to install at start time (comma separated list) - C compilation not supported!
+ENV EXTRA_PACKAGES ""
 
 # the Notebook can be synced with a Git Repo
-ENV RUN_GIT_REPO ""
+ENV GIT_REPO ""
 
 # Server Name and Port (used by reverse proxy to expose UI)
 ENV VIRTUAL_HOST jupyter
@@ -58,8 +58,9 @@ ENV VIRTUAL_PORT 8888
 
 # Image description
 LABEL Description="Python lab $JUPYTER_VERSION (including Jupyter)"
-LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
-LABEL Usage2="docker run -it --rm jupyter python"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} -e EXTRA_PACKAGES=plotly -e PYPI_MIRROR=\${PYPI_MIRROR} --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
+LABEL Usage2="docker run -it --rm jupyter console"
+
 
 RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi openssl git jq su-exec \
     && cd /usr/bin && ln -fs python3 python \
