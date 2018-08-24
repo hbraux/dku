@@ -4,8 +4,7 @@ function _setup {
   [[ -f .setup ]] && return
 
   if [[ -n ${MIRROR_PYPI} ]]; then 
-    pip config set global.index-url ${MIRROR_PYPI}/simple
-    pip config set global.extra-index-url https://pypi.python.org/pypi
+    pip config set global.index-url ${MIRROR_PYPI}
   fi
 
   if [[ -n ${RUN_PACKAGES} ]]; then
@@ -39,10 +38,9 @@ EOF
 }
 
 function _start {
+  _setup
   su-exec jupyter jupyter-notebook --no-browser
 }
-
-_setup
 
 case $1 in
   start) _start;;

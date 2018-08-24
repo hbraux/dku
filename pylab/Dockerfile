@@ -1,13 +1,13 @@
-# A Python3 lab including ML Libs and jupyter 
+# A Python3 env including standard ML packages and an embeded jupyter server
 
-# using a multi-stage build to produce an image with minimal size
+# using a multi-stage build to produce a final image with minimal size (no compiler included!)
 FROM alpine as builder
 
 # additional packages to be added at build time (comma separated list)
 ARG BUILD_PACKAGES=scikit-learn
 
-# A PYPI mirror can be set
-ARG MIRROR_PYPI=""
+# A PYPI mirror can be set at build time
+ARG BUILD_MIRROR_PYPI=""
 
 # Python version (given by Alpine repo, cannot be changed)
 ENV PYTHON_VERSION 3.6
@@ -20,7 +20,7 @@ COPY --from=alpine-llvm /opt/llvm/* /opt/llvm/
 RUN cp /opt/llvm/*.pub /etc/apk/keys && apk add /opt/llvm/*.apk && rm -fr /opt/llvm
 
 # set mirror
-RUN if [ -n "${MIRROR_PYPI}" ]; then pip config set global.index-url ${MIRROR_PYPI}/simple; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
+RUN if [ -n "${BUILD_MIRROR_PYPI}" ]; then pip config set global.index-url ${BUILD_MIRROR_PYPI}/simple; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
 
 RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools 
 RUN pip install llvmlite # required for numba @jit (using llvm6)
@@ -46,7 +46,7 @@ ENV PYTHON_VERSION 3.6
 # A PYPI mirror can be set at run time
 ENV MIRROR_PYPI ""
 
-# additional packages to install at start time (comma separated list)
+# additional packages to install at start time (comma separated list) without any compilation!
 ENV RUN_PACKAGES plotly
 
 # the Notebook can be synced with a Git Repo
@@ -84,6 +84,3 @@ VOLUME /data
 ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["start"]
-
-
-
