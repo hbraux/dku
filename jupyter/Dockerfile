@@ -7,7 +7,7 @@ FROM alpine as builder
 ARG BUILD_PACKAGES=scikit-learn
 
 # A PYPI mirror can be set at build time
-ARG BUILD_MIRROR_PYPI=""
+ARG BUILD_PYPI_MIRROR=""
 
 # Python version (given by Alpine repo, cannot be changed)
 ENV PYTHON_VERSION 3.6
@@ -20,7 +20,7 @@ COPY --from=alpine-llvm /opt/llvm/* /opt/llvm/
 RUN cp /opt/llvm/*.pub /etc/apk/keys && apk add /opt/llvm/*.apk && rm -fr /opt/llvm
 
 # set mirror
-RUN if [ -n "${BUILD_MIRROR_PYPI}" ]; then pip config set global.index-url ${BUILD_MIRROR_PYPI}/simple; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
+RUN if [ -n "${BUILD_PYPI_MIRROR}" ]; then pip config set global.index-url ${BUILD_PYPI_MIRROR}; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
 
 RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools 
 RUN pip install llvmlite # required for numba @jit (using llvm6)
@@ -49,9 +49,6 @@ ENV PYPI_MIRROR ""
 # additional packages to install at start time (comma separated list) - C compilation not supported!
 ENV EXTRA_PACKAGES ""
 
-# the Notebook can be synced with a Git Repo
-ENV GIT_REPO ""
-
 # Server Name and Port (used by reverse proxy to expose UI)
 ENV VIRTUAL_HOST jupyter
 ENV VIRTUAL_PORT 8888
@@ -75,7 +72,7 @@ COPY --from=builder /usr/share/jupyter /usr/share/jupyter
 COPY --from=builder /usr/etc/jupyter /usr/etc/jupyter
 
 COPY entrypoint.sh /
-
+COPY README.ipynb /data
 WORKDIR /data
 
 EXPOSE ${VIRTUAL_PORT}
