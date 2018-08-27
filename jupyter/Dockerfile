@@ -12,10 +12,10 @@ ARG BUILD_PYPI_MIRROR=""
 # Python version (given by Alpine repo, cannot be changed)
 ENV PYTHON_VERSION 3.6
 
-# install the build tools and the development libs
+# install the build tools and the development libs for optimisation, cryptograhy, and matplotlib
 RUN apk add python3 g++ make file python3-dev musl-dev libffi-dev openssl-dev openblas-dev libpng-dev freetype-dev 
 
-# install llvm6 libs
+# install the llvm6 libs needed by package llvmlite
 COPY --from=alpine-llvm /opt/llvm/* /opt/llvm/
 RUN cp /opt/llvm/*.pub /etc/apk/keys && apk add /opt/llvm/*.apk && rm -fr /opt/llvm
 
@@ -23,7 +23,7 @@ RUN cp /opt/llvm/*.pub /etc/apk/keys && apk add /opt/llvm/*.apk && rm -fr /opt/l
 RUN if [ -n "${BUILD_PYPI_MIRROR}" ]; then pip config set global.index-url ${BUILD_PYPI_MIRROR}; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
 
 RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools 
-RUN pip install llvmlite # required for numba @jit (using llvm6)
+RUN pip install llvmlite # required for numba @jit 
 RUN pip install cryptography requests # basic packages
 RUN pip install numpy scipy # basic sci libs
 RUN pip install numba # optimizer
@@ -55,8 +55,8 @@ ENV VIRTUAL_PORT 8888
 
 # Image description
 LABEL Description="Python lab $JUPYTER_VERSION (including Jupyter)"
-LABEL Usage="docker run -d --name=${VIRTUAL_HOST} -e EXTRA_PACKAGES=plotly -e PYPI_MIRROR=\${PYPI_MIRROR} --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
-LABEL Usage2="docker run -it --rm jupyter console"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} -e EXTRA_PACKAGES=plotly -e PYPI_MIRROR=\$PYPI_MIRROR --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
+LABEL Usage2="docker run -it --rm -e EXTRA_PACKAGES=avro-python3 -e https_proxy=\$https-proxy jupyter console"
 
 
 RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi openssl git jq su-exec \
