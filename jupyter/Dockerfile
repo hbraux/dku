@@ -12,17 +12,17 @@ ARG BUILD_PYPI_MIRROR=""
 # Python version (given by Alpine repo, cannot be changed)
 ENV PYTHON_VERSION 3.6
 
-# install the build tools and the development libs for optimisation, cryptograhy, and matplotlib
-RUN apk add python3 g++ make file python3-dev musl-dev libffi-dev openssl-dev openblas-dev libpng-dev freetype-dev 
+# install the build tools and the development libs
+RUN apk add python3 g++ make file python3-dev curl coreutils musl-dev libffi-dev openssl-dev openblas-dev libpng-dev freetype-dev
 
-# install the llvm6 libs needed by package llvmlite
+# install the llvm6 libs from another image 
 COPY --from=alpine-llvm /opt/llvm/* /opt/llvm/
 RUN cp /opt/llvm/*.pub /etc/apk/keys && apk add /opt/llvm/*.apk && rm -fr /opt/llvm
 
+RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools 
 # set mirror
 RUN if [ -n "${BUILD_PYPI_MIRROR}" ]; then pip config set global.index-url ${BUILD_PYPI_MIRROR}; pip config set global.extra-index-url https://pypi.python.org/pypi ;fi
-
-RUN python3 -m ensurepip && pip3 install --upgrade pip setuptools 
+# as this is a builder we can use multiple RUNs
 RUN pip install llvmlite # required for numba @jit 
 RUN pip install cryptography requests # basic packages
 RUN pip install numpy scipy # basic sci libs
@@ -56,10 +56,10 @@ ENV VIRTUAL_PORT 8888
 # Image description
 LABEL Description="Python lab $JUPYTER_VERSION (including Jupyter)"
 LABEL Usage="docker run -d --name=${VIRTUAL_HOST} -e EXTRA_PACKAGES=plotly -e PYPI_MIRROR=\$PYPI_MIRROR --mount source=jupyter,target=/data -p ${VIRTUAL_PORT}:${VIRTUAL_PORT} jupyter"
-LABEL Usage2="docker run -it --rm -e EXTRA_PACKAGES=avro-python3 -e https_proxy=\$https-proxy jupyter console"
+LABEL Usage2="docker run -it --rm -e EXTRA_PACKAGES=avro-python3 -e https_proxy=\$https_proxy jupyter console"
 
 
-RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi openssl git jq su-exec \
+RUN apk add --no-cache python3 libstdc++ openblas freetype libpng libffi openssl x264-libs git jq su-exec \
     && cd /usr/bin && ln -fs python3 python \
     && adduser -D -h /data jupyter
 
@@ -70,6 +70,9 @@ COPY --from=builder /usr/bin/pip* /usr/bin/
 COPY --from=builder /usr/bin/jupyter* /usr/bin/
 COPY --from=builder /usr/share/jupyter /usr/share/jupyter
 COPY --from=builder /usr/etc/jupyter /usr/etc/jupyter
+
+# copy ffmpeg/x264 for matplotlib.animations video convertion 
+COPY --from=alpine-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 
 COPY entrypoint.sh /
 COPY README.ipynb /data

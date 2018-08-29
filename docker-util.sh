@@ -430,8 +430,7 @@ function dockerClean {
   do grep -q "[0-9a-f]\{64\}" <<<$vol && _docker volume rm $vol
   done
   ids=$(docker images -f "dangling=true" -q)
-  [[ -n $ids ]] && _docker rmi -f $ids
-  echo
+  opt f && [[ -n $ids ]] && _docker rmi -f $ids
   dockerStatus
 }
 
