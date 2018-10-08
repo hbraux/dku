@@ -1,0 +1,15 @@
+---
+
+- name: lookup for bin files
+  find:
+    path: "{{ repo_dir }}/bin"
+    patterns: "*"
+  register: bin_files
+
+- name: create links in $HOME/bin
+  file:
+    src: "{{ item }}"
+    dest: "{{ ansible_env.HOME }}/bin/{{ item|basename }}"
+    state: link
+  with_items: "{{ bin_files.files|map(attribute='path')|list }}"
+

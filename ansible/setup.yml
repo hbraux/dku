@@ -1,6 +1,0 @@
-
-- name: create link dku
-  file:
-    src: "{{ playbook_dir }}/bin/dku"
-    dest: "{{ ansible_env.HOME }}/bin/dku"
-    state: link
