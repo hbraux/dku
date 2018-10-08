@@ -479,13 +479,13 @@ function dockerInfo {
 }
 
 
-function dockerCopy {
-  [[ -n $DOCKER_COPY_HOST ]]  || die "DOCKER_COPY_HOST not defined"
-  info "$ docker save $DockerImg"
-  docker save $DockerImg >$TmpFile
-  info "($DOCKER_COPY_HOST) $ docker load -i .."
-  DOCKER_HOST=$DOCKER_COPY_HOST docker load -i $TmpFile
-  DOCKER_HOST=$DOCKER_COPY_HOST docker images
+function dockerExport {
+  [[ $# -eq 2 ]] || die "$0 <image> <dest>"
+  info "$ docker save $1"
+  docker save $1 >$TmpFile || die
+  info "DOCKER_HOST=$2 $ docker load -i .."
+  DOCKER_HOST=$2 docker load -i $TmpFile || die
+  DOCKER_HOST=$2 docker images
   rm $TmpFile
 }
   
@@ -508,7 +508,7 @@ case $Command in
   test)     getDockerImg $Arguments; dockerTest;;
   l|logs)   getDockerImg $Arguments; dockerLogs;;
   i|info)   getDockerImg $Arguments; dockerInfo;;
-  copy)     getDockerImg $Arguments; dockerCopy;;
+  export)   dockerExport $Arguments;;
   status)   dockerStatus;;
   clean)    dockerClean ;;
   *) getDockerImg $Command; dockerRun $Arguments;;
