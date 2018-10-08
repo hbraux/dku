@@ -1,5 +1,5 @@
-# docker-light
-A set of slim docker images based on Alpine Linux with low memory requirements.
+# dku
+A wrapper for Docker plus a set of "slim" docker images (based on Alpine Linux and with low memory requirements)
 To be used for testing or development purpose, for instance on a Virtualbox VM
 
 The images do NOT support services and docker-compose. They are designed to run in standalone mode
