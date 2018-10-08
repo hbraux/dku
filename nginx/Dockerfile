@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.7
 
 ARG SITE_DOWNLOAD=https://github.com/jwilder
 

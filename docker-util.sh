@@ -108,7 +108,6 @@ function die {
 # -----------------------------------------------------------------------------
 # internal functions
 # -----------------------------------------------------------------------------
-
 # load config file and check expected variables 
 function _loadcfg {
   if [[ -f $_CfgFile ]]
@@ -171,7 +170,7 @@ function opt {
 # analyse command line and set $Command $Arguments and options
 # the first arguments are supported options, the second $@ 
 function init {
-  _about
+  # _about
   if [[ ${1:0:1} == - ]]
   then _setopts ${1:1} ; shift
   fi
@@ -213,7 +212,6 @@ declare DockerContainer
 declare DockerVolume
 declare -i DockerTty=1
 declare -i DockerMount=0
-declare SquidIP
 
 # ------------------------------------------
 # usage
@@ -223,20 +221,22 @@ function usage {
   echo "Usage: $TOOL_NAME.sh command [options] arguments*
 
 Options:
+  -c : cache files in nginx server for the build 
   -f : force
   -v : verbose
 
 commands:
- status            : docker status (default if no command provided)
+ status            : docker status (default if no command is given))
  help              : show this message
- b|build <image>   : build an image
- [run]   <image>...: run an image (run is optional)
- stop    <image>   : stop  image
- destroy <image>   : stop and remove a container
- test    <image>   : test a docker image
- l|logs  <image>   : docker logs
- i|info  <image>   : image's info
- clean             ! docker clean
+ list              : list available builds (aliases)
+ build   <alias>   : build an image
+ info    <alias>   : image's information
+ [run]   <alias>...: starts a container using image's alias ('run' is optional)
+ logs    <alias>   : show container logs
+ stop    <alias>   : stop a container 
+ destroy <alias>   : stop a container and remove associated ressources
+ test    <alias>   : test a docker image
+ clean             : cleanup pruned containers 
 "
   quit
 }
@@ -247,10 +247,6 @@ commands:
 
 function getProxy {
   [[ -n $Proxy ]] && return
-  if [[ -n $PROXY_SQUID ]] 
-  then SquidIP=$(grep $PROXY_SQUID /etc/hosts | cut -d\  -f1 )
-       Proxy=http://$SquidIP:${PROXY_PORT-3128}  
-  fi
   Proxy=${Proxy:-$http_proxy}
   export http_proxy=
   export https_proxy=
@@ -271,25 +267,27 @@ function dockerCheck {
   [[ $? -eq 0 ]] || die "Docker host $DOCKER_HOST not reachable"
   # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
   _docker network ls | grep -q $DOCKER_NETWORK 
-  [[ $? -eq 0 ]] || _docker network create --driver bridge $DOCKER_NETWORK || die
-
+  if [[ $? -ne 0 ]]; then
+    info "This is the first time dku is run. Creating bridged network '$DOCKER_NETWORK"
+    docker network create --driver bridge $DOCKER_NETWORK || die
+    echo -e "\nRun 'dku help' to show available commands"
+    exit 0
+  fi
 }
 
 function getDockerImg {
   [[ $# -eq 0 ]] && usage
   DockerImg=$1
   dockerCheck
-  if [[ -d $1 ]]
-  then DockerDir=$1
-       [[ $DockerDir == . ]] && DockerDir=$(pwd)
-       DockerImg=${DockerDir##*/}
-  else [[ -d $HOME/docker ]]  || die "Missing $HOME/docker"
-       DockerDir=$HOME/docker/$DockerImg
+  if [[ -d $1 ]]; then DockerDir=$1
+    [[ $DockerDir == . ]] && DockerDir=$(pwd)
+    DockerImg=${DockerDir##*/}
+  else 
+    d=$(readlink -f $0)
+    d=$(dirname $d)
+    DockerDir=${d/bin/docker}/$DockerImg
   fi
-  if [[ ! -d $DockerDir ]] 
-  then [[ $Command == build ]] && die "no docker repository named '$DockerImg'"
-    die "Command '$Command' not supported; and no docker repository named '$DockerImg'"
-  fi
+  [[ -d $DockerDir ]] || die "no build named '$DockerImg'"
   [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
   # Using the image name for container's name
   DockerContainer=${DockerImg}
@@ -298,20 +296,36 @@ function getDockerImg {
 }
 
 function dockerBuild {
-  info "Building image from $DockerDir"
   id=$(docker images -q ${DockerImg} |head -1)
-  if [[ -n $id ]]
-  then warn "Image $DockerImg [$id] already built"
-       opt f || return
-       docker rmi -f --no-prune  $id
+  if [[ -n $id ]]; then
+    warn "Image $DockerImg [$id] already built"
+    opt f || return
+    docker rmi -f --no-prune  $id
   fi
-  egrep -q '^VOLUME \[' $DockerDir/Dockerfile && die "$TOOL_NAME does not support VOLUME in JSON format"
+  for from in $(grep '^FROM' $DockerDir/Dockerfile | awk '{print $2}'); do
+    if [[ ${from%:*} != centos && ${from%:*} != alpine ]]; then
+      docker images | awk '{ print $1":"$2 }' |  grep -q $from \
+	|| die "missing image $from -> dku build $from"
+    fi
+  done
+  egrep -q '^VOLUME \[' $DockerDir/Dockerfile \
+    && die "$TOOL_NAME does not support VOLUME in JSON format"
   vers=$(egrep -i "^ENV ${DockerImg/alpine-}[A-Z]*_VERSION" $DockerDir/Dockerfile | awk '{print $3}')
   [[ -n $vers ]] || warn "No VERSION found in Dockerfile"
+
+  # cache the files
+  opt c
+  if [[ $? -eq 0 ]]; then
+    site=$(grep 'ARG SITE_DOWNLOAD=' docker/hbase/Dockerfile  | cut -d= -f2)
+    [[ -n $site ]] || die "Dockerfile is not using SITE_DOWNLOAD as ARG"
+    url=$(grep '${SITE_DOWNLOAD}' $DockerDir/Dockerfile |  sed -e "s/.*\${SITE_DOWNLOAD}//;s/ .*//;s/\${.*}/$vers/")
+    echo $site/$url
+    # 
+    exit
+  fi
   # check if this a  server or an intermediate image
   egrep -q '^ENTRYPOINT' $DockerDir/Dockerfile
-  if [[ $? -eq 0 ]]
-  then 
+  if [[ $? -eq 0 ]]; then
     egrep -q '^LABEL Description' $DockerDir/Dockerfile || \
       warn "No Description Label in Dockerfile"
     egrep -q '^LABEL Usage' $DockerDir/Dockerfile || \
@@ -324,6 +338,7 @@ function dockerBuild {
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
   do [[ -n ${!arg} ]] && buildargs="$buildargs --build-arg $arg=${!arg}"
   done
+  info "Building image from $DockerDir"
   if [[ -x $DockerDir/build.sh ]]
   then info "$ build.sh $buildargs"
        cd $DockerDir && ./build.sh $tags $buildargs 
@@ -335,6 +350,8 @@ function dockerBuild {
 
 
 function dockerRun {
+  id=$(docker images -q ${DockerImg} |head -1)
+  [[ -n $id ]] || die "image ${DockerImg} is not built"
   args=$*
   if [[ $# -eq 0 && $(egrep -c '^ENTRYPOINT' $DockerDir/Dockerfile) -eq 1 ]]
   then # server mode
@@ -489,29 +506,44 @@ function dockerExport {
   DOCKER_HOST=$2 docker images
   rm $TmpFile
 }
+
+function listBuilds {
+  d=$(readlink -f $0)
+  cd $(dirname $d)/../docker
+  info "Available builds:"
+  for f in $(ls */Dockerfile); do
+    desc=$(grep 'Description=' $f | cut -d= -f2 | sed -e 's/"//g;s/ ${.*}//')
+    echo "${f%/*} : $desc"
+  done
+}
+
   
 # ------------------------------------------
 # Command Line
 # ------------------------------------------
 
+
 # analyse command line
-if [[ $# -eq 0 ]]
-then init -fv status
-else init -fv $@
+if [[ $# -eq 0 ]]; then 
+  init -fv status
+else 
+  [[ $1 == -h ]] && usage
+  init -fvc $@
 fi
 
 case $Command in
   help)     usage;;
-  b|build)  getDockerImg $Arguments; dockerBuild;;
+  list)     listBuilds;;
+  build)    getDockerImg $Arguments; dockerBuild;;
   run)      getDockerImg $Arguments; dockerRun ${Arguments/$DockerImg/};;
   destroy)  getDockerImg $Arguments; dockerDestroy;;
   stop)     getDockerImg $Arguments; dockerStop;;
   test)     getDockerImg $Arguments; dockerTest;;
-  l|logs)   getDockerImg $Arguments; dockerLogs;;
-  i|info)   getDockerImg $Arguments; dockerInfo;;
+  logs)     getDockerImg $Arguments; dockerLogs;;
+  info)     getDockerImg $Arguments; dockerInfo;;
   export)   dockerExport $Arguments;;
   status)   dockerStatus;;
-  clean)    dockerClean ;;
+  clean)    dockerClean;;
   *) getDockerImg $Command; dockerRun $Arguments;;
 esac
 

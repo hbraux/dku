@@ -1,4 +1,4 @@
-FROM alpine-jdk
+FROM alpine-jdk:8
 
 ARG SITE_DOWNLOAD=http://apache.crihan.fr
 
