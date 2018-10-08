@@ -1,7 +1,7 @@
 #!/bin/bash
-# A docker helper to build, run and manage Docker images
+# A docker wrapper to build, run and manage Docker images
 
-TOOL_NAME=docker-util
+TOOL_NAME=dku
 TOOL_VERS=0.0.7
 
 
@@ -268,9 +268,9 @@ function dockerCheck {
   # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
   _docker network ls | grep -q $DOCKER_NETWORK 
   if [[ $? -ne 0 ]]; then
-    info "This is the first time dku is run. Creating bridged network '$DOCKER_NETWORK"
+    info "This is the first time $TOOL_NAME is run. Creating bridged network '$DOCKER_NETWORK"
     docker network create --driver bridge $DOCKER_NETWORK || die
-    echo -e "\nRun 'dku help' to show available commands"
+    echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
   fi
 }
@@ -305,7 +305,7 @@ function dockerBuild {
   for from in $(grep '^FROM' $DockerDir/Dockerfile | awk '{print $2}'); do
     if [[ ${from%:*} != centos && ${from%:*} != alpine ]]; then
       docker images | awk '{ print $1":"$2 }' |  grep -q $from \
-	|| die "missing image $from -> dku build $from"
+	|| die "missing image $from -> $TOOL_NAME build $from"
     fi
   done
   egrep -q '^VOLUME \[' $DockerDir/Dockerfile \
