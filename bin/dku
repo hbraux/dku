@@ -339,7 +339,7 @@ function dockerBuild {
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
   do [[ -n ${!arg} ]] && buildargs="$buildargs --build-arg $arg=${!arg}"
   done
-  info "Building image from $DockerDir"
+  info "Building image from $DockerDir" 
   if [[ -x $DockerDir/build.sh ]]
   then info "$ build.sh $buildargs"
        cd $DockerDir && ./build.sh $tags $buildargs 
