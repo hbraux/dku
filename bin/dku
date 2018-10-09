@@ -196,6 +196,7 @@ function init {
 # ------------------------------------------
 
 DOCKER_NETWORK=${DOCKER_NETWORK:-udn}  # for DNS purpose
+DOCKER_USERNAME=dku
 
 # ------------------------------------------
 # Parameters (loaded from Config file)
@@ -303,7 +304,7 @@ function dockerBuild {
     docker rmi -f --no-prune  $id
   fi
   for from in $(grep '^FROM' $DockerDir/Dockerfile | awk '{print $2}'); do
-    if [[ ${from%:*} != centos && ${from%:*} != alpine ]]; then
+    if [[ ${from:1:${#DOCKER_USERNAME}} != $DOCKER_USERNAME ]] ; then
       docker images | awk '{ print $1":"$2 }' |  grep -q $from \
 	|| die "missing image $from -> $TOOL_NAME build $from"
     fi
@@ -331,8 +332,8 @@ function dockerBuild {
     egrep -q '^LABEL Usage' $DockerDir/Dockerfile || \
       warn "No Usage Label in Dockerfile"
   fi
-  tags="-t $DockerImg:latest"
-  [[ -n $vers ]] && tags="$tags -t $DockerImg:$vers"
+  tags="-t $DOCKER_USERNAME/$DockerImg:latest"
+  [[ -n $vers ]] && tags="$tags -t DOCKER_USERNAME/$DockerImg:$vers"
 
   buildargs="--build-arg http_proxy=$Proxy --build-arg https_proxy=$Proxy --build-arg no_proxy=${PROXY_BYPASS:-127.0.0.1}"
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
