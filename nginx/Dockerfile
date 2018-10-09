@@ -8,7 +8,7 @@ ENV DOCKER_GEN_VERSION 0.7.4
 
 LABEL Description="Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
 
-LABEL Usage="docker run -d --name=nginx --network=udn -e DOCKER_HOST=\$DOCKER_HOST --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 nginx"
+LABEL Usage="docker run -d --name=nginx --network=udn -e DOCKER_HOST=\$DOCKER_HOST --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 dku/nginx"
 
 RUN apk update && apk add --no-cache nginx curl && rm -rf /var/cache/apk/* 
 
