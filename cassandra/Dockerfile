@@ -1,6 +1,6 @@
-FROM alpine-jdk
+FROM dku/alpine-jdk:8
 
-ARG SITE_DOWNLOAD=http://artfiles.org/apache.org
+ARG HTTP_MIRROR=http://artfiles.org/apache.org
 
 ENV CASSANDRA_VERSION 3.11.2
 
@@ -11,12 +11,12 @@ ENV HEAP low
 ENV SERVER_NAME cassandra
 
 LABEL Description="Cassandra ${CASSANDRA_VERSION} server"
-LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mount source=cassandra,target=/data -p 9042:9042 cassandra start "
-LABEL Usage2="docker run -it --rm --network=udn cassandra cqlsh"
+LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mount source=cassandra,target=/data -p 9042:9042 dku/cassandra"
+LABEL Usage2="docker run -it --rm --network=udn dku/cassandra cqlsh"
 
-RUN set -x && apk update && apk add python \
+RUN set -x && apk add --no-cache python \
     && mkdir -p /opt  \
-    && curl -s ${SITE_DOWNLOAD}/cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 
+    && curl -s ${HTTP_MIRROR}/cassandra/${CASSANDRA_VERSION}/apache-cassandra-${CASSANDRA_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 
     && mv /opt/apache-cassandra-${CASSANDRA_VERSION} /opt/cassandra \
     && mkdir -p /opt/cassandra/logs /data \
     && adduser -D -s /sbin/nologin cassandra \
