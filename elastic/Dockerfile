@@ -1,6 +1,6 @@
-FROM alpine-jdk
+FROM dku/alpine-jdk:8
 
-ARG SITE_DOWNLOAD=https://artifacts.elastic.co
+ARG HTTP_MIRROR=https://artifacts.elastic.co
 
 ENV ELASTICSEARCH_VERSION 5.6.6
 
@@ -14,14 +14,14 @@ ENV VIRTUAL_HOST elastic
 ENV VIRTUAL_PORT 9200
 
 LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} standalone Server"
-LABEL Usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} elastic"
+LABEL Usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} dku/elastic"
 
 
 # Heap size
 ENV HEAP 128m
 
 RUN set -x && mkdir -p /opt /data \
-    && curl -s ${SITE_DOWNLOAD}/downloads/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz | tar xzf - -C /opt \ 
+    && curl -s ${HTTP_MIRROR}/downloads/elasticsearch/elasticsearch-${ELASTICSEARCH_VERSION}.tar.gz | tar xzf - -C /opt \ 
     && mv /opt/elasticsearch-${ELASTICSEARCH_VERSION} /opt/elasticsearch \
     && adduser -DH -s /sbin/nologin elastic \
     && chown -R elastic: /opt/elasticsearch /data
