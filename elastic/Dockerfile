@@ -13,8 +13,8 @@ ENV CLUSTER_NAME test
 ENV VIRTUAL_HOST elastic
 ENV VIRTUAL_PORT 9200
 
-LABEL Description "Elasticsearch ${ELASTICSEARCH_VERSION} standalone Server"
-LABEL Usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} dku/elastic"
+LABEL Description="Elasticsearch ${ELASTICSEARCH_VERSION} standalone Server"
+LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} dku/elastic"
 
 
 # Heap size

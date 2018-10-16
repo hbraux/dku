@@ -519,7 +519,7 @@ function dockerExport {
 
 function listBuilds {
   d=$(readlink -f $0)
-  cd $(dirname $d)/../docker
+  cd $(dirname $d)/..
   info "Available builds:"
   for f in $(ls */Dockerfile); do
     desc=$(grep 'Description=' $f | cut -d= -f2 | sed -e 's/"//g;s/ ${.*}//')

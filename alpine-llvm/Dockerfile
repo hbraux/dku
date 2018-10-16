@@ -1,11 +1,17 @@
-# Alpine image that builds llvm6 apk and put them in /opt/llvm 
-# The build takes about 2 hours!
+# Alpine Linux with llvm6
+#
+# This image can be sourced with FROM or used in a multi-stage build
+# The llvm6 apk(s) are available in /opt/llvm
+#
+# Note that build takes about 2 hours!
 # Open PR for llvm6 package: https://github.com/alpinelinux/aports/pull/3583
 # See https://stackoverflow.com/questions/50258121/building-llvm-6-under-linux-alpine
 
-FROM alpine
+FROM alpine:3.8
 
 ENV LLVM_VERSION 6
+
+LABEL Description="Alpine image with llvm6"
 
 ENV TARGET_DIR /opt/llvm
 
@@ -23,10 +29,3 @@ RUN apk --update --virtual build-dependencies add alpine-sdk git diffutils build
     && rm $TARGET_DIR/llvm6-static* && rm $TARGET_DIR/llvm6-test* \
     && deluser --remove-home apk \
     && apk del build-dependencies
-
-
-
-
-
-
-
