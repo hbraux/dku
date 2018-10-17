@@ -16,8 +16,8 @@ ENV SITE_KNOX_AUTH
 
 ENV HBASE_TABLE
 
-COPY bWLwgP.css /
-COPY app.py /
+#COPY bWLwgP.css /
+#COPY app.py /
 
 
 EXPOSE 8050
