@@ -290,7 +290,11 @@ function getDockerImg {
     d=$(readlink -f $0)
     d=$(dirname $d)
     DockerDir=${d/\/bin/}/$DockerImg
-    [[ -d $DockerDir ]] || die "no build named '$DockerImg'"
+    if [[ ! -d $DockerDir ]]; then
+      pwd=$(pwd)
+      [[ ${pwd##*/} == $DockerImg ]] || die "no build named '$DockerImg'"
+      DockerDir=$pwd
+    fi
   fi
   [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
   # Using the image name for container's name
