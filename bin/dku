@@ -281,16 +281,21 @@ function getDockerImg {
   DockerImg=$1
   [[ ${DockerImg:0:3} == dku ]] && DockerImg=${DockerImg:4}
   dockerCheck
-  if [[ -d $1 ]]; then DockerDir=$1
+  if [[ -d $1 ]]; then
+    DockerDir=$1
     [[ $DockerDir == . ]] && DockerDir=$(pwd)
-    DockerImg=${DockerDir##*/}
+    [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
+    # chek if IMAGE_NAME is defined as a label
+    DockerImg=$(grep 'LABEL IMAGE_NAME=' $DockerDir/Dockerfile | sed 's/.*="//;s/".*//')
+    # otherwise use current directory name
+    [[ -n $DockerImg ]] || DockerImg=${DockerDir##*/}
   else 
     d=$(readlink -f $0)
     d=$(dirname $d)
     DockerDir=${d/\/bin/}/$DockerImg
+    [[ -d $DockerDir ]] || die "no build named '$DockerImg'"
+    [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
   fi
-  [[ -d $DockerDir ]] || die "no build named '$DockerImg'"
-  [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
   # Using the image name for container's name
   DockerContainer=${DockerImg}
   # as  well for the volume name
