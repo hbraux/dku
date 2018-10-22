@@ -195,11 +195,16 @@ function init {
 # Constants
 # ------------------------------------------
 
-DOCKER_NETWORK=${DOCKER_NETWORK:-udn}  # for DNS purpose
+# unless env variable IMAGE_REPO is defined, the repo is the username 
+DKU_REPO=${IMAGE_REPO:-${USER,,}}
 
 # ------------------------------------------
-# Parameters (loaded from Config file)
+# Configuration Parameters (loaded from Config file)
 # ------------------------------------------
+# shall be in upper cases and end with an underscore
+
+DKU_NETWORK_=udn  
+
 
 # ------------------------------------------
 # Global variables
@@ -218,7 +223,7 @@ declare -i DockerMount=0
 # ------------------------------------------
 
 function usage {
-  echo "Usage: $TOOL_NAME.sh command [options] arguments*
+  echo "Usage: $TOOL_NAME command [options] arguments*
 
 Options:
   -c : cache files in nginx server for the build 
@@ -237,6 +242,7 @@ commands:
  start   <alias>   : start a container  
  destroy <alias>   : stop a container and remove associated ressources
  test    <alias>   : test a docker image
+ export  <alias> <docker host> : re-tag and export an image
  clean             : cleanup pruned containers 
 "
   quit
@@ -267,10 +273,10 @@ function dockerCheck {
   ping -c1 $DOCKER_HOST >/dev/null 2>&1
   [[ $? -eq 0 ]] || die "Docker host $DOCKER_HOST not reachable"
   # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
-  _docker network ls | grep -q $DOCKER_NETWORK 
+  _docker network ls | grep -q $DKU_NETWORK_ 
   if [[ $? -ne 0 ]]; then
-    info "This is the first time $TOOL_NAME is run. Creating bridged network '$DOCKER_NETWORK"
-    docker network create --driver bridge $DOCKER_NETWORK || die
+    info "This is the first time $TOOL_NAME is run. Creating bridged network '$DKU_NETWORK_"
+    docker network create --driver bridge $DKU_NETWORK_ || die
     echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
   fi
@@ -304,7 +310,7 @@ function getDockerImg {
 }
 
 function dockerBuild {
-  id=$(docker images -q dku/${DockerImg} |head -1)
+  id=$(docker images -q ${DKU_REPO}/${DockerImg} |head -1)
   if [[ -n $id ]]; then
     warn "Image $DockerImg [$id] already built"
     opt f || return
@@ -327,21 +333,23 @@ function dockerBuild {
     site=$(grep 'ARG HTTP_MIRROR=' $DockerDir/Dockerfile  | cut -d= -f2)
     [[ -n $site ]] || die "Dockerfile is not using HTTP_MIRROR as ARG"
     ip=$(getent hosts $DOCKER_HOST | awk '{ print $1 }')
-    export PROXY_BYPASS=$PROXY_BYPASS,$ip
+    export no_proxy=$no_proxy,$ip
     export HTTP_MIRROR=http://$ip/files
   fi
   # check if this a  server or an intermediate image
   egrep -q '^ENTRYPOINT' $DockerDir/Dockerfile
   if [[ $? -eq 0 ]]; then
-    egrep -q '^LABEL Description' $DockerDir/Dockerfile || \
-      warn "No Description Label in Dockerfile"
-    egrep -q '^LABEL Usage' $DockerDir/Dockerfile || \
-      warn "No Usage Label in Dockerfile"
+    egrep -q '^LABEL description ' $DockerDir/Dockerfile || \
+      warn "No LABEL description in Dockerfile"
+    egrep -q '^LABEL usage ' $DockerDir/Dockerfile || \
+      warn "No LABEL usage in Dockerfile"
   fi
-  tags="-t dku/$DockerImg:latest"
-  [[ -n $vers ]] && tags="$tags -t dku/$DockerImg:$vers"
+  # always add the tag latest to ease emac sdocker run
+  tags="-t ${DKU_REPO}/$DockerImg:latest"
+  [[ -n $vers ]] && tags="$tags -t ${DKU_REPO}/$DockerImg:$vers"
 
-  buildargs="--build-arg http_proxy=$Proxy --build-arg https_proxy=$Proxy --build-arg no_proxy=${PROXY_BYPASS:-127.0.0.1}"
+  buildargs="--build-arg http_proxy=$Proxy --build-arg https_proxy=$Proxy --build-arg no_proxy=$no_proxy"
+  export IMAGE_REPO=$DKU_REPO
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
   do [[ -n ${!arg} ]] && buildargs="$buildargs --build-arg $arg=${!arg}"
   done
@@ -357,7 +365,7 @@ function dockerBuild {
 
 
 function dockerRun {
-  id=$(docker images -q dku/${DockerImg} |head -1)
+  id=$(docker images -q ${DKU_REPO}/${DockerImg} |head -1)
   [[ -n $id ]] || die "image ${DockerImg} is not built"
   args=$*
   if [[ $# -eq 0 && $(egrep -c '^ENTRYPOINT' $DockerDir/Dockerfile) -eq 1 ]]
@@ -372,12 +380,12 @@ function dockerRun {
 	    return
        fi
        # first check for usage in label
-       opts=$(dockerInfo | grep Usage: | sed -e "s~Usage: docker run ~~;s~ dku/${DockerImg}\$~~" )
+       opts=$(dockerInfo | grep "usage:" | head -1 | sed -e "s~usage: docker run ~~;s~ ${DKU_REPO}/${DockerImg}\$~~" )
        if [[ -n $opts ]]
        then
          opts=$(eval echo $opts)
        else
-         opts="-d --name=${DockerContainer} --network=$DOCKER_NETWORK"
+         opts="-d --name=${DockerContainer} --network=$DKU_NETWORK_"
          volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
          [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
          for port in $(egrep '^EXPOSE ' $DockerDir/Dockerfile | cut -c 8-)
@@ -400,14 +408,14 @@ function dockerRun {
        grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
        args=""
   else # command mode
-       opts="-i --rm --network=$DOCKER_NETWORK"
+       opts="-i --rm --network=$DKU_NETWORK_"
        if [[ $DockerMount -eq 1 ]] 
        then volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
 	    [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
        fi
      [[ $DockerTty -eq 1 ]] && opts="-t $opts"       
   fi
-  _docker run $opts dku/$DockerImg $args
+  _docker run $opts ${DKU_REPO}/$DockerImg $args
 }
 
 function dockerStop {
@@ -509,17 +517,16 @@ function dockerLogs {
 
 function dockerInfo {
   # output labels
-  docker inspect --format='{{range $k,$v:=.Config.Labels}}{{$k}}: {{println $v}}{{end}}' dku/$DockerImg
+  docker inspect --format='{{range $k,$v:=.Config.Labels}}{{$k}}: {{println $v}}{{end}}' ${DKU_REPO}/$DockerImg
 }
 
 
 function dockerExport {
-  [[ $# -eq 2 ]] || die "$0 <image> <dest>"
-  info "$ docker save $1"
-  docker save $1 >$TmpFile || die
-  info "DOCKER_HOST=$2 $ docker load -i .."
-  DOCKER_HOST=$2 docker load -i $TmpFile || die
-  DOCKER_HOST=$2 docker images
+  [[ $# -eq 2 ]] || usage
+  target=$2
+  info "docker save ${DKU_REPO}/$DockerImg  >$TmpFile"
+  docker save ${DKU_REPO}/$DockerImg >$TmpFile || die
+  DOCKER_HOST=$target docker load -i $TmpFile || die
   rm $TmpFile
 }
 
@@ -528,7 +535,7 @@ function listBuilds {
   cd $(dirname $d)/..
   info "Available builds:"
   for f in $(ls */Dockerfile); do
-    desc=$(grep 'Description=' $f | cut -d= -f2 | sed -e 's/"//g;s/ ${.*}//')
+    desc=$(grep 'description ' $f | sed -e 's/" *$//g;s/^.* "//g;s/ ${.*}//')
     echo "${f%/*} : $desc"
   done
 }
@@ -558,7 +565,7 @@ case $Command in
   test)     getDockerImg $Arguments; dockerTest;;
   logs)     getDockerImg $Arguments; dockerLogs;;
   info)     getDockerImg $Arguments; dockerInfo;;
-  export)   dockerExport $Arguments;;
+  export)   getDockerImg $Arguments; dockerExport $Arguments;;
   status)   dockerStatus;;
   clean)    dockerClean;;
   *) getDockerImg $Command; dockerRun $Arguments;;

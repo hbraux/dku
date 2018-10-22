@@ -1,15 +1,17 @@
-FROM alpine
+ARG ALPINE_VERSION
+FROM alpine:${ALPINE_VERSION:-3.8}
+
+ARG IMAGE_REPO
 
 ENV RETHINKDB_VERSION 2.3.6
-
 ENV SERVER_TAG default
 
 # Server Name and Port (used by reverse proxy to expose Web UI)
 ENV VIRTUAL_HOST rethinkdb
 ENV VIRTUAL_PORT 8080
 
-LABEL Description="RethinkDB ${RETHINKDB_VERSION} light server"
-LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn -p 28015 -p 29015 -p ${VIRTUAL_PORT} rethinkdb"
+LABEL description "RethinkDB ${RETHINKDB_VERSION} light server"
+LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -p 28015:28015 -p 29015 -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/rethinkdb"
 
 RUN set -x && mkdir -p /data \
     && apk update && apk add --no-cache rethinkdb  \

@@ -1,5 +1,7 @@
-FROM dku/alpine-jdk:8
+ARG IMAGE_REPO
+FROM ${IMAGE_REPO}/alpine-jdk:8
 
+ARG IMAGE_REPO
 ARG HTTP_MIRROR=http://artfiles.org/apache.org
 
 ENV CASSANDRA_VERSION 3.11.2
@@ -10,9 +12,9 @@ ENV HEAP low
 # Server Name (required by CLI)
 ENV SERVER_NAME cassandra
 
-LABEL Description="Cassandra ${CASSANDRA_VERSION} server"
-LABEL Usage="docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mount source=cassandra,target=/data -p 9042:9042 dku/cassandra"
-LABEL Usage2="docker run -it --rm --network=udn dku/cassandra cqlsh"
+LABEL description "Cassandra ${CASSANDRA_VERSION} server"
+LABEL usage "docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mount source=cassandra,target=/data -p 9042:9042 ${IMAGE_REPO:-local}/cassandra"
+LABEL usage_shell "docker run -it --rm --network=udn ${IMAGE_REPO:-local}/cassandra cqlsh"
 
 RUN set -x && apk add --no-cache python \
     && mkdir -p /opt  \

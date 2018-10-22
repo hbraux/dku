@@ -1,9 +1,12 @@
-FROM dku/alpine-jdk:8
+# Limitations: JAVA API only supported on Docker's User Defined Network udn
 
+ARG IMAGE_REPO
+FROM ${IMAGE_REPO}/alpine-jdk:8
+
+ARG IMAGE_REPO
 ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 
 ENV HBASE_VERSION 1.2.7
-
 # supported values: low, default, or a size
 ENV HEAP low
 
@@ -11,10 +14,9 @@ ENV HEAP low
 ENV VIRTUAL_HOST hbase
 ENV VIRTUAL_PORT 8080
 
-LABEL Description="HBase ${HBASE_VERSION} standalone server with Rest API"
-LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mount source=hbase,target=/data  -p ${VIRTUAL_PORT} dku/hbase"
-LABEL Usage2="docker run -it --rm --network=udn dku/hbase shell"
-LABEL Warnings="JAVA API only supported on Docker's User Defined Network udn"
+LABEL description "HBase ${HBASE_VERSION} standalone server with Rest API"
+LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mount source=hbase,target=/data  -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/hbase"
+LABEL usage_shell "docker run -it --rm --network=udn ${IMAGE_REPO:-local}/hbase shell"
 
 RUN set -x && mkdir -p /opt  \
     && curl -s ${HTTP_MIRROR}/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 

@@ -7,11 +7,13 @@
 # Open PR for llvm6 package: https://github.com/alpinelinux/aports/pull/3583
 # See https://stackoverflow.com/questions/50258121/building-llvm-6-under-linux-alpine
 
-FROM alpine:3.8
+ARG ALPINE_VERSION
+
+FROM alpine:${ALPINE_VERSION:-3.8}
 
 ENV LLVM_VERSION 6
 
-LABEL Description="Alpine image with llvm6"
+LABEL description "Alpine image with llvm6"
 
 ENV TARGET_DIR /opt/llvm
 

@@ -1,14 +1,14 @@
-FROM alpine:3.7
+ARG ALPINE_VERSION
+FROM alpine:${ALPINE_VERSION:-3.8}
 
+ARG IMAGE_REPO
 ARG SITE_DOWNLOAD=https://github.com/jwilder
 
 ENV NGINX_VERSION 1.12.2
-
 ENV DOCKER_GEN_VERSION 0.7.4
 
-LABEL Description="Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
-
-LABEL Usage="docker run -d --name=nginx --network=udn -e DOCKER_HOST=\$DOCKER_HOST --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 dku/nginx"
+LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
+LABEL usage "docker run -d --name=nginx --network=udn -e DOCKER_HOST=\$DOCKER_HOST --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
 
 RUN apk update && apk add --no-cache nginx curl && rm -rf /var/cache/apk/* 
 
