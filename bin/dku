@@ -284,22 +284,34 @@ function dockerCheck {
 
 function getDockerImg {
   [[ $# -eq 0 ]] && usage
-  DockerImg=$1
-  [[ ${DockerImg:0:3} == dku ]] && DockerImg=${DockerImg:4}
+  arg=$1
   dockerCheck
-  if [[ -d $1 ]]; then
-    DockerDir=$1
+  # if argument is a directory, use urrent directory as image name
+  if [[ -d $arg ]]; then
+    DockerDir=$arg
     [[ $DockerDir == . ]] && DockerDir=$(pwd)
-    # use current directory as image name
     DockerImg=${DockerDir##*/}
   else 
+    # in case argument starts by repo, strip it
+    [[ ${arg%/*} == $DKU_REPO ]] && arg=${arg#*/}
     d=$(readlink -f $0)
     d=$(dirname $d)
-    DockerDir=${d/\/bin/}/$DockerImg
-    if [[ ! -d $DockerDir ]]; then
-      pwd=$(pwd)
-      [[ ${pwd##*/} == $DockerImg ]] || die "no build named '$DockerImg'"
-      DockerDir=$pwd
+    d=${d/\/bin/}
+    # otherwise check if a directory with image name exists
+    if [[ -d $d/$arg ]]; then
+      DockerImg=$arg
+      DockerDir=$d/$DockerImg
+    else
+      # or with alpine + image
+      if [[ -d ${d/alpine-$arg} ]]; then
+	DockerImg=alpine-$arg
+	DockerDir=$d/$DockerImg
+      else
+	pwd=$(pwd)
+	[[ ${pwd##*/} == $arg ]] || die "no build named '$arg'"
+	DockerDir=$pwd
+	DockerImg=$arg
+      fi
     fi
   fi
   [[ -f $DockerDir/Dockerfile ]] || die "No file $DockerDir/Dockerfile"
