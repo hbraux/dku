@@ -39,7 +39,8 @@ EOF
 <li><a href="http://$DOCKER_HOST/files/">HTTP download</a></li>
 <li><a href="http://$DOCKER_HOST/hbase/">HBase</a></li>
 <li><a href="http://$DOCKER_HOST/elastic/">Elasticsearch</a></li>
-<li><a href="http://$DOCKER_HOST/flink/">Elasticsearch</a></li>
+<li><a href="http://$DOCKER_HOST/flink/">Flink</a></li>
+<li><a href="http://$DOCKER_HOST/rethinkdb/">RethinkDB</a></li>
 </ul>
 </div>
 </body>
