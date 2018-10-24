@@ -4,9 +4,9 @@ FROM ${IMAGE_REPO}/alpine-jdk:8
 ARG IMAGE_REPO
 ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 
-ENV KAFKA_VERSION 0.10.2.1 
+ENV KAFKA_VERSION 1.1.1
 
-ENV SCALA_VERSION 2.10 
+ENV SCALA_VERSION 2.12
 
 # supported values: low, default, or a size
 ENV HEAP low

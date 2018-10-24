@@ -4,10 +4,16 @@ function _setup {
   [[ -f .setup ]] && return
   mkdir -p /data/files
   echo $DOCKER_HOST | egrep -q '^[a-z]*' 
-  if [[ $? -ne 0 ]]; then
+  if [ $? -ne 0 ]; then
     echo "ERROR: DOCKER_HOST shall be a FQDN."
     exit 1
   fi
+  tmpl=/etc/nginx/nginx_${URL_REDIRECTION}.tmpl
+  if [ ! -f $tmpl ] ; then
+    echo "ERROR: file $tmpl does not exist."
+    exit 1
+  fi
+  ln -fs $tmpl /etc/nginx/nginx.tmpl
   DOCKER_DOMAIN=$(echo $DOCKER_HOST | sed 's/[a-z0-9]*\.//')
   sed -i "s/%DOCKER_DOMAIN%/${DOCKER_DOMAIN}/g" /etc/nginx/nginx.tmpl
 
@@ -27,10 +33,13 @@ EOF
   cat>/data/index.html <<EOF
 <html>
 <body>
-<b>NGINX HTTP cache and Reverse Proxy for docker services</b>
+<b>NGINX HTTP cache + Reverse Proxy for docker services running on $DOCKER_HOST</b>
 <br/>
 <ul>
-<li><a href="http://$DOCKER_HOST:80/files">HTTP download</a></li>
+<li><a href="http://$DOCKER_HOST/files/">HTTP download</a></li>
+<li><a href="http://$DOCKER_HOST/hbase/">HBase</a></li>
+<li><a href="http://$DOCKER_HOST/elastic/">Elasticsearch</a></li>
+<li><a href="http://$DOCKER_HOST/flink/">Elasticsearch</a></li>
 </ul>
 </div>
 </body>

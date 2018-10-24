@@ -1,0 +1,52 @@
+# this NGINX template should be reviewed
+
+{{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
+
+{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
+
+upstream {{ $vhost }} {
+
+  {{ range $container := $containers }}
+    {{ range $knownNetwork := $CurrentContainer.Networks }}
+      {{ range $containerNetwork := $container.Networks }}
+	{{ if (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host")) }}
+	      	  {{ $port := $container.Env.VIRTUAL_PORT }}
+		  {{ $address := where $container.Addresses "Port" $port | first }}
+
+    server {{ $containerNetwork.IP }}:{{ $address.Port }};
+
+	{{ else }}
+
+    # Cannot connect to network of this container
+    server 127.0.0.1 down;
+
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+
+}
+
+{{ end }}
+
+
+server {
+    listen 80 default_server;
+    root  /data;
+
+    location / {
+    }
+
+    location /files/ {
+      autoindex on;
+    }
+
+{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
+
+    location /{{$vhost}}/ {
+       rewrite ^/{{$vhost}}/(.*)$ /$1 break;
+       proxy_pass http://{{$vhost}};
+    }
+
+{{end}}
+}

@@ -294,21 +294,21 @@ function getDockerImg {
   else 
     # in case argument starts by repo, strip it
     [[ ${arg%/*} == $DKU_REPO ]] && arg=${arg#*/}
-    d=$(readlink -f $0)
-    d=$(dirname $d)
-    d=${d/\/bin/}
+    gitdir=$(readlink -f $0)
+    gitdir=$(dirname $gitdir)
+    gitdir=${gitdir/\/bin/}
     # otherwise check if a directory with image name exists
-    if [[ -d $d/$arg ]]; then
+    if [[ -d $gitdir/$arg ]]; then
       DockerImg=$arg
-      DockerDir=$d/$DockerImg
+      DockerDir=$gitdir/$DockerImg
     else
       # or with alpine + image
-      if [[ -d ${d/alpine-$arg} ]]; then
+      if [[ -d $gitdir/alpine-$arg ]]; then
 	DockerImg=alpine-$arg
-	DockerDir=$d/$DockerImg
+	DockerDir=$gitdir/$DockerImg
       else
 	pwd=$(pwd)
-	[[ ${pwd##*/} == $arg ]] || die "no build named '$arg'"
+	[[ ${pwd##*/} == $arg ]] || die "no alias named '$arg'"
 	DockerDir=$pwd
 	DockerImg=$arg
       fi

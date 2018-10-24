@@ -10,7 +10,7 @@ ENV SERVER_TAG default
 ENV VIRTUAL_HOST rethinkdb
 ENV VIRTUAL_PORT 8080
 
-LABEL description "RethinkDB ${RETHINKDB_VERSION} light server"
+LABEL description "RethinkDB ${RETHINKDB_VERSION} server"
 LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -p 28015:28015 -p 29015 -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/rethinkdb"
 
 RUN set -x && mkdir -p /data \
