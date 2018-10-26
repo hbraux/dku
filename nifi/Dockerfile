@@ -1,6 +1,8 @@
-FROM alpine-jdk
+ARG IMAGE_REPO
+FROM ${IMAGE_REPO}/alpine-jdk:8
 
-ARG SITE_DOWNLOAD=http://apache.crihan.fr
+ARG IMAGE_REPO
+ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 
 # To reduce image size the Nifi Archives are exluded by default (override to bypass exclusion)
 ARG NIFI_EXCLUDES="*.nar"
@@ -20,11 +22,11 @@ ENV VIRTUAL_HOST nifi
 ENV VIRTUAL_PORT 8080
 
 
-LABEL Description="Nifi ${NIFI_VERSION} light server"
-LABEL Usage="docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=nifi,target=/data -p ${VIRTUAL_PORT} nifi"
+LABEL description "Nifi ${NIFI_VERSION} slim server"
+LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=nifi,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/nifi"
 
 RUN set -x && mkdir -p /opt /data \
-    && curl -s ${SITE_DOWNLOAD}/dist/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.tar.gz | tar xzf - -C /opt \
+    && curl -s ${HTTP_MIRROR}/dist/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.tar.gz | tar xzf - -C /opt \
     && mv /opt/nifi-${NIFI_VERSION} /opt/nifi  \
     && adduser -D -s /sbin/nologin nifi \
     && chown -R nifi: /opt/nifi /data \

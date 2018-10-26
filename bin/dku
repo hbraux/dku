@@ -203,6 +203,7 @@ DKU_REPO=${IMAGE_REPO:-${USER,,}}
 # ------------------------------------------
 # shall be in upper cases and end with an underscore
 
+# name of user-defined bridge network 
 DKU_NETWORK_=udn  
 
 
@@ -275,7 +276,7 @@ function dockerCheck {
   # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
   _docker network ls | grep -q $DKU_NETWORK_ 
   if [[ $? -ne 0 ]]; then
-    info "This is the first time $TOOL_NAME is run. Creating bridged network '$DKU_NETWORK_"
+    info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network '$DKU_NETWORK_ (required for DNS resolution between containers)."
     docker network create --driver bridge $DKU_NETWORK_ || die
     echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
