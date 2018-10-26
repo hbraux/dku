@@ -1,34 +1,66 @@
-# this NGINX template should be reviewed
 
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
+# redirect URL
+map $uri $redirect_uri {
+
 {{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
-
-upstream {{ $vhost }} {
-
   {{ range $container := $containers }}
+  {{ $rule := $container.Env.RPROXY_RULE }}
+  {{ if (eq $rule "redirect")  }}
     {{ range $knownNetwork := $CurrentContainer.Networks }}
       {{ range $containerNetwork := $container.Networks }}
-	{{ if (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host")) }}
-	      	  {{ $port := $container.Env.VIRTUAL_PORT }}
-		  {{ $address := where $container.Addresses "Port" $port | first }}
+        {{ if (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host")) }}
 
-    server {{ $containerNetwork.IP }}:{{ $address.Port }};
+         {{ $port := $container.Env.VIRTUAL_PORT }}
+	 {{ $address := where $container.Addresses "Port" $port | first }}
 
-	{{ else }}
-
-    # Cannot connect to network of this container
-    server 127.0.0.1 down;
+    ~^/{{ $vhost }}/(.*) http://{{ $containerNetwork.IP }}:{{ $address.Port }}/$1;
 
         {{ end }}
       {{ end }}
     {{ end }}
   {{ end }}
+{{ end }}
+{{ end }}
+
+}
+
+
+# upstreams config
+
+{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
+
+    {{ range $container := $containers }}
+    {{ $rule := $container.Env.RPROXY_RULE }}
+    {{ if (eq $rule "")  }}
+
+upstream {{ $vhost }} {
+
+      {{ range $knownNetwork := $CurrentContainer.Networks }}
+        {{ range $containerNetwork := $container.Networks }}
+  	{{ if (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host")) }}
+	      	  {{ $port := $container.Env.VIRTUAL_PORT }}
+		  {{ $address := where $container.Addresses "Port" $port | first }}
+
+    server {{ $containerNetwork.IP }}:{{ $address.Port }};
+
+  	  {{ else }}
+
+    # Cannot connect to network of this container
+    server 127.0.0.1 down;
+
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
 
 }
 
 {{ end }}
+{{ end }}
 
+# server config
 
 server {
     listen 80 default_server;
@@ -41,12 +73,29 @@ server {
       autoindex on;
     }
 
-{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
-
-    location /{{$vhost}}/ {
-       rewrite ^/{{$vhost}}/(.*)$ /$1 break;
-       proxy_pass http://{{$vhost}};
+    location / {
+      try_files $uri $uri/ @redirect-map;
+    }
+    location @redirect-map {
+      return 302 $redirect_uri;
     }
 
+    
+
+{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST"}}
+
+    {{ range $container := $containers }}
+    {{ $rule := $container.Env.RPROXY_RULE }}
+    {{ if (eq $rule "")  }}
+
+    location /{{ $vhost }}/ {
+       rewrite ^/{{ $vhost }}/(.*)$ /$1 break;
+       proxy_pass http://{{ $vhost }};
+    }
+
+    {{end}}
+    {{end}}
+
 {{end}}
+
 }

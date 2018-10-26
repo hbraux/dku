@@ -17,9 +17,10 @@ ARG DRIVERS="none"
 ENV NIFI_VERSION 1.7.1
 ENV HEAP_SIZE 256m
 
-# Server Name and Port (used by reverse proxy to expose API)
+# Server Name and Port (used by reverse proxy to expose WebUI)
 ENV VIRTUAL_HOST nifi
 ENV VIRTUAL_PORT 8080
+ENV RPROXY_RULE redirect 
 
 
 LABEL description "Nifi ${NIFI_VERSION} slim server"
