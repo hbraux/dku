@@ -41,7 +41,7 @@ EOF
 <li><a href="http://$DOCKER_HOST/elastic/">Elasticsearch</a></li>
 <li><a href="http://$DOCKER_HOST/flink/">Flink</a></li>
 <li><a href="http://$DOCKER_HOST/rethinkdb/">RethinkDB</a></li>
-<li><a href="http://$DOCKER_HOST/nifi/">NIFI</a></li>
+<li><a href="http://$DOCKER_HOST/nifi/nifi/">NIFI</a></li>
 </ul>
 </div>
 </body>

@@ -1,41 +1,14 @@
+{{/* File syntax: https://golang.org/pkg/text/template/ */}}
 
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
-# redirect URL
-map $uri $redirect_uri {
-
-{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
-  {{ range $container := $containers }}
-  {{ $rule := $container.Env.RPROXY_RULE }}
-  {{ if (eq $rule "redirect")  }}
-    {{ range $knownNetwork := $CurrentContainer.Networks }}
-      {{ range $containerNetwork := $container.Networks }}
-        {{ if (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host")) }}
-
-         {{ $port := $container.Env.VIRTUAL_PORT }}
-	 {{ $address := where $container.Addresses "Port" $port | first }}
-
-    ~^/{{ $vhost }}/(.*) http://{{ $containerNetwork.IP }}:{{ $address.Port }}/$1;
-
-        {{ end }}
-      {{ end }}
-    {{ end }}
-  {{ end }}
-{{ end }}
-{{ end }}
-
-}
-
-
 # upstreams config
 
-{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
+{{ range $host, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
 
     {{ range $container := $containers }}
-    {{ $rule := $container.Env.RPROXY_RULE }}
-    {{ if (eq $rule "")  }}
 
-upstream {{ $vhost }} {
+upstream {{ $host }} {
 
       {{ range $knownNetwork := $CurrentContainer.Networks }}
         {{ range $containerNetwork := $container.Networks }}
@@ -58,7 +31,6 @@ upstream {{ $vhost }} {
 }
 
 {{ end }}
-{{ end }}
 
 # server config
 
@@ -68,32 +40,20 @@ server {
 
     location / {
     }
-
+ 
     location /files/ {
       autoindex on;
     }
 
-    location / {
-      try_files $uri $uri/ @redirect-map;
-    }
-    location @redirect-map {
-      return 302 $redirect_uri;
-    }
-
-    
-
-{{ range $vhost, $containers := groupBy $ "Env.VIRTUAL_HOST"}}
+{{ range $host, $containers := groupBy $ "Env.VIRTUAL_HOST"}}
 
     {{ range $container := $containers }}
-    {{ $rule := $container.Env.RPROXY_RULE }}
-    {{ if (eq $rule "")  }}
 
-    location /{{ $vhost }}/ {
-       rewrite ^/{{ $vhost }}/(.*)$ /$1 break;
-       proxy_pass http://{{ $vhost }};
+    location /{{ $host }}/ {
+       rewrite ^/{{ $host }}/(.*)$ /$1 break;
+       proxy_pass http://{{ $host }};
     }
 
-    {{end}}
     {{end}}
 
 {{end}}
