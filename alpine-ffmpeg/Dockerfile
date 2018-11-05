@@ -1,8 +1,12 @@
 # A small version of ffmpeg with only x264 support (to be used for matplotlib)
 
-from alpine
+ARG ALPINE_VERSION
+
+FROM alpine:${ALPINE_VERSION:-3.8}
 
 ENV FFMPEG_VERSION 4.0.2
+
+LABEL description "Alpine image with ffmpeg"
 
 # build the APK
 RUN apk --virtual build-dependencies add --no-cache curl gcc make musl-dev coreutils freetype-dev x264-dev yasm \
