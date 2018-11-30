@@ -431,6 +431,17 @@ function dockerRun {
   _docker run $opts ${DKU_REPO}/$DockerImg $args
 }
 
+function dockerExec {
+  id=$(docker ps  | grep "${DockerContainer}\$" | awk '{print $1}')
+  if [[ -z $id ]]; then
+    warn "Container ${DockerContainer} not running"
+    return 1
+  else 
+    shift
+    _docker exec $id $@
+  fi
+}
+
 function dockerStop {
   id=$(docker ps  | grep "${DockerContainer}\$" | awk '{print $1}')
   if [[ -z $id ]]

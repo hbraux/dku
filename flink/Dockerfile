@@ -6,8 +6,8 @@ FROM ${IMAGE_REPO}/alpine-jdk:8
 ARG IMAGE_REPO
 ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 
-ENV FLINK_VERSION 1.6.1
-ENV FLINK_BUILD hadoop27-scala_2.11
+ENV FLINK_VERSION 1.6.2
+ENV FLINK_BUILD scala_2.11
 
 # supported values: low, default, or a size
 ENV HEAP low
@@ -22,14 +22,16 @@ LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mo
 RUN set -x && mkdir -p /opt  \
     && curl -s ${HTTP_MIRROR}/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-${FLINK_BUILD}.tgz | tar xzf - -C /opt \ 
     && mv /opt/flink-${FLINK_VERSION} /opt/flink \
-    && rm -fr /opt/flink/docs /opt/flink/examples \
-    && mkdir -p /opt/flink/logs /data \
+    && cp /opt/flink/examples/streaming/WordCount.jar /opt/flink \
+    && rm -fr /opt/flink/docs /opt/flink/examples /opt/flink/opt \
+    && mkdir -p /data \
     && adduser -DH -s /sbin/nologin flink \
     && chown -R flink: /opt/flink /data 
 
 ENV PATH ${PATH}:/opt/flink/bin
 
-COPY entrypoint.sh /
+# entrypoint.sh shall be placed in Flink dir
+COPY entrypoint.sh /opt/flink/bin/
 
 WORKDIR /opt/flink
 
@@ -43,7 +45,7 @@ EXPOSE 8081
 
 VOLUME /data
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/opt/flink/bin/entrypoint.sh"]
 
 CMD ["start"]
 
