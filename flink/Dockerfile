@@ -27,6 +27,8 @@ RUN set -x && mkdir -p /opt  \
     && adduser -DH -s /sbin/nologin flink \
     && chown -R flink: /opt/flink /data 
 
+ENV PATH ${PATH}:/opt/flink/bin
+
 COPY entrypoint.sh /
 
 WORKDIR /opt/flink
