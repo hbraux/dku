@@ -1,4 +1,4 @@
 sleep 20
-curl -v http://$DOCKER_HOST:9090/nifi
+curl -v http://$HOSTNAME:9090/nifi
 
 

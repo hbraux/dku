@@ -4,7 +4,7 @@
 
 {{ range $host, $containers := groupBy $ "Env.VIRTUAL_HOST" }}
 
-upstream {{ $host }}.%DOCKER_DOMAIN% {
+upstream {{ $host }}.%HOST_DOMAIN% {
 
   {{ range $container := $containers }}
     {{ range $knownNetwork := $CurrentContainer.Networks }}
@@ -27,9 +27,9 @@ upstream {{ $host }}.%DOCKER_DOMAIN% {
 }
 
 server {
-    server_name {{ $host }}.%DOCKER_DOMAIN%;
+    server_name {{ $host }}.%HOST_DOMAIN%;
     location / {
-        proxy_pass http://{{ $host }}.%DOCKER_DOMAIN%/;
+        proxy_pass http://{{ $host }}.%HOST_DOMAIN%/;
     }    
 }
 {{ end }}

@@ -3,9 +3,9 @@
 function _setup {
   [[ -f .setup ]] && return
   mkdir -p /data/files
-  echo $DOCKER_HOST | egrep -q '^[a-z]*' 
+  echo $HOST_HOSTNAME | egrep -q '^[a-z]*' 
   if [ $? -ne 0 ]; then
-    echo "ERROR: DOCKER_HOST shall be a FQDN."
+    echo "ERROR: HOST_HOSTNAME shall be a FQDN."
     exit 1
   fi
   tmpl=/etc/nginx/nginx_${URL_REDIRECTION}.tmpl
@@ -14,8 +14,8 @@ function _setup {
     exit 1
   fi
   ln -fs $tmpl /etc/nginx/nginx.tmpl
-  DOCKER_DOMAIN=$(echo $DOCKER_HOST | sed 's/[a-z0-9]*\.//')
-  sed -i "s/%DOCKER_DOMAIN%/${DOCKER_DOMAIN}/g" /etc/nginx/nginx.tmpl
+  HOST_DOMAIN=$(echo $HOST_HOSTNAME | sed 's/[a-z0-9]*\.//')
+  sed -i "s/%HOST_DOMAIN%/${HOST_DOMAIN}/g" /etc/nginx/nginx.tmpl
 
   cat >/etc/nginx/conf.d/default.conf<<EOF
 server {
@@ -33,15 +33,15 @@ EOF
   cat>/data/index.html <<EOF
 <html>
 <body>
-<b>NGINX HTTP cache + Reverse Proxy for docker services running on $DOCKER_HOST</b>
+<b>NGINX HTTP cache + Reverse Proxy for docker services running on $HOST_HOSTNAME</b>
 <br/>
 <ul>
-<li><a href="http://$DOCKER_HOST/files/">HTTP download</a></li>
-<li><a href="http://$DOCKER_HOST/hbase/">HBase</a></li>
-<li><a href="http://$DOCKER_HOST/elastic/">Elasticsearch</a></li>
-<li><a href="http://$DOCKER_HOST/flink/">Flink</a></li>
-<li><a href="http://$DOCKER_HOST/rethinkdb/">RethinkDB</a></li>
-<li><a href="http://$DOCKER_HOST/nifi/nifi/">NIFI</a></li>
+<li><a href="http://$HOST_HOSTNAME/files/">HTTP download</a></li>
+<li><a href="http://$HOST_HOSTNAME/hbase/">HBase</a></li>
+<li><a href="http://$HOST_HOSTNAME/elastic/">Elasticsearch</a></li>
+<li><a href="http://$HOST_HOSTNAME/flink/">Flink</a></li>
+<li><a href="http://$HOST_HOSTNAME/rethinkdb/">RethinkDB</a></li>
+<li><a href="http://$HOST_HOSTNAME/nifi/nifi/">NIFI</a></li>
 </ul>
 </div>
 </body>
@@ -54,8 +54,6 @@ EOF
 
 function _start {
   nginx
-  # unset DOCKER_HOST as it conflicts with /var/run/docker.sock
-  unset DOCKER_HOST
   docker-gen -watch -notify "nginx -s reload" -only-published /etc/nginx/nginx.tmpl /etc/nginx/conf.d/default.conf 
 }
 

@@ -270,10 +270,7 @@ function _docker {
 function dockerCheck {
   getProxy
   which docker >/dev/null 2>&1 || die "Docker not installed"
-  [[ -n $DOCKER_HOST ]] || die "DOCKER_HOST not defined"
-  ping -c1 $DOCKER_HOST >/dev/null 2>&1
-  [[ $? -eq 0 ]] || die "Docker host $DOCKER_HOST not reachable"
-  # egrep -q '^[0-9]+' <<<$DOCKER_HOST || die "\$DOCKER_HOST must be an IP"
+  id | grep -q '(docker)' || die "$USER deos not be belong to docker group"
   _docker network ls | grep -q $DKU_NETWORK_ 
   if [[ $? -ne 0 ]]; then
     info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network '$DKU_NETWORK_ (required for DNS resolution between containers)."
@@ -345,7 +342,7 @@ function dockerBuild {
   if [[ $? -eq 0 ]]; then
     site=$(grep 'ARG HTTP_MIRROR=' $DockerDir/Dockerfile  | cut -d= -f2)
     [[ -n $site ]] || die "Dockerfile is not using HTTP_MIRROR as ARG"
-    ip=$(getent hosts $DOCKER_HOST | awk '{ print $1 }')
+    ip=$(getent hosts $HOSTNAME | awk '{ print $1 }')
     export no_proxy=$no_proxy,$ip
     export HTTP_MIRROR=http://$ip/files
   fi
@@ -550,6 +547,7 @@ function dockerExport {
   target=$2
   info "docker save ${DKU_REPO}/$DockerImg  >$TmpFile"
   docker save ${DKU_REPO}/$DockerImg >$TmpFile || die
+  # TODO: this may not work
   DOCKER_HOST=$target docker load -i $TmpFile || die
   rm $TmpFile
 }

@@ -10,7 +10,7 @@ ENV DOCKER_GEN_VERSION 0.7.4
 ENV URL_REDIRECTION PATH
 
 LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
-LABEL usage "docker run -d --name=nginx --network=udn -e DOCKER_HOST=\$DOCKER_HOST --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
+LABEL usage "docker run -d --name=nginx --network=udn -e HOST_HOSTNAME=\$HOSTNAME --mount source=nginx,target=/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
 
 RUN apk update && apk add --no-cache nginx curl && rm -rf /var/cache/apk/* 
 
