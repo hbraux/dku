@@ -585,6 +585,7 @@ case $Command in
   start)     getDockerImg $Arguments; dockerStart;;
   stop)     getDockerImg $Arguments; dockerStop;;
   test)     getDockerImg $Arguments; dockerTest;;
+  exec)     getDockerImg $Arguments; dockerExec $Arguments;;
   logs)     getDockerImg $Arguments; dockerLogs;;
   info)     getDockerImg $Arguments; dockerInfo;;
   export)   getDockerImg $Arguments; dockerExport $Arguments;;
