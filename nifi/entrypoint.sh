@@ -7,6 +7,7 @@ function _setup {
   sed -i -e 's~=./conf/flow.xml.gz~=/data/conf/flow.xml.gz~' conf/nifi.properties
   sed -i -e "s/nifi.web.http.port=.*/nifi.web.http.port=${VIRTUAL_PORT}/" conf/nifi.properties
   sed -i -e "s/nifi.sensitive.props.key=.*/nifi.sensitive.props.key=password/" conf/nifi.properties
+  sed -i -e "s~nifi.web.proxy.context.path=.*~nifi.web.proxy.context.path=/nifi~" conf/nifi.properties
 
   HEAP_SIZE=${HEAP_SIZE:-512m}
   sed -i -e "s/java.arg.2=-Xms.*/java.arg.2=-Xms${HEAP_SIZE}/" conf/bootstrap.conf

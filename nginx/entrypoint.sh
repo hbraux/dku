@@ -15,6 +15,7 @@ function _setup {
   fi
   ln -fs $tmpl /etc/nginx/nginx.tmpl
   HOST_DOMAIN=$(echo $HOST_HOSTNAME | sed 's/[a-z0-9]*\.//')
+  sed -i "s/%HOST_HOSTNAME%/${HOST_HOSTNAME}/g" /etc/nginx/nginx.tmpl
   sed -i "s/%HOST_DOMAIN%/${HOST_DOMAIN}/g" /etc/nginx/nginx.tmpl
 
   cat >/etc/nginx/conf.d/default.conf<<EOF

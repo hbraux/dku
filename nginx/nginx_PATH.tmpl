@@ -36,9 +36,15 @@ upstream {{ $host }} {
 
 server {
     listen 80 default_server;
+
     root  /data;
 
     location / {
+        if ($request_method = OPTIONS ) {
+    	    add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            return 200;
+    	    }
     }
  
     location /files/ {
@@ -49,12 +55,24 @@ server {
 
     {{ range $container := $containers }}
 
+      {{ if (eq $host "nifi") }}
+    location /{{ $host }}/ {
+       rewrite ^/{{ $host }}/(.*)$ /$1 break;
+       proxy_set_header X-ProxyPort 80;
+       proxy_set_header X-ProxyHost %HOST_HOSTNAME%;
+       proxy_set_header X-ProxyContextPath /nifi;
+       proxy_pass http://{{ $host }};
+    }
+      {{ else }}
+    
     location /{{ $host }}/ {
        rewrite ^/{{ $host }}/(.*)$ /$1 break;
        proxy_pass http://{{ $host }};
     }
 
+      {{end}}
     {{end}}
+
 
 {{end}}
 
