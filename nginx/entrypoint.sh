@@ -1,8 +1,8 @@
 #!/bin/sh
 
 function _setup {
-  [[ -f .setup ]] && return
-  mkdir -p /data/files
+  [[ -f /etc/nginx/.setup ]] && return
+  mkdir -p /data/files/upload
   echo $HOST_HOSTNAME | egrep -q '^[a-z]*' 
   if [ $? -ne 0 ]; then
     echo "ERROR: HOST_HOSTNAME shall be a FQDN."
@@ -13,15 +13,17 @@ function _setup {
     echo "ERROR: file $tmpl does not exist."
     exit 1
   fi
-  ln -fs $tmpl /etc/nginx/nginx.tmpl
+  cp $tmpl /etc/nginx/nginx.tmpl
   HOST_DOMAIN=$(echo $HOST_HOSTNAME | sed 's/[a-z0-9]*\.//')
   sed -i "s/%HOST_HOSTNAME%/${HOST_HOSTNAME}/g" /etc/nginx/nginx.tmpl
   sed -i "s/%HOST_DOMAIN%/${HOST_DOMAIN}/g" /etc/nginx/nginx.tmpl
 
+  sed -i "s/^user .*//" /etc/nginx/nginx.conf
+  rm -fr /etc/nginx/conf.d
+  mkdir /etc/nginx/conf.d
   cat >/etc/nginx/conf.d/default.conf<<EOF
 server {
   listen 80 default_server;
-  listen [::]:80 default_server;
   root  /data;
   location / {
   }
@@ -48,17 +50,18 @@ EOF
 </body>
 </html>
 EOF
-  chown -R nginx:nginx /data
-  touch .setup
+  touch etc/nginx/.setup
 }
 
 
+_setup
+
 function _start {
+  _setup
   nginx
   docker-gen -watch -notify "nginx -s reload" -only-published /etc/nginx/nginx.tmpl /etc/nginx/conf.d/default.conf 
 }
 
-_setup
 
 case $1 in
   start) _start;;

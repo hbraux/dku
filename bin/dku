@@ -278,6 +278,10 @@ function dockerCheck {
     echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
   fi
+  if [[ -z $DOCKER_GID ]]; then
+    export DOCKER_GID=$(grep docker /etc/group |cut -d: -f3)
+  fi
+
 }
 
 function getDockerImg {
@@ -346,9 +350,11 @@ function dockerBuild {
     export no_proxy=$no_proxy,$ip
     export HTTP_MIRROR=http://$ip/files
   fi
-  # check if this a  server or an intermediate image
+  # check if this a real image or an intermediate image
   egrep -q '^ENTRYPOINT' $DockerDir/Dockerfile
   if [[ $? -eq 0 ]]; then
+    egrep -q '^USER ' $DockerDir/Dockerfile || \
+      warn "No USER in Dockerfile (root is unsecure!)"
     egrep -q '^LABEL description ' $DockerDir/Dockerfile || \
       warn "No LABEL description in Dockerfile"
     egrep -q '^LABEL usage ' $DockerDir/Dockerfile || \
