@@ -1,0 +1,67 @@
+ARG ALPINE_VERSION
+
+# first creates a Builder to compile nginx with the upload module
+FROM alpine:${ALPINE_VERSION:-3.8} as builder
+
+ENV NGINX_VERSION 1.12.2
+ENV NGINX_UPLOAD_VERSION 2.3.0
+
+RUN apk update && apk add alpine-sdk coreutils curl pcre-dev libressl-dev zlib-dev
+
+RUN set -x && mkdir /opt \
+    && curl -Ls https://github.com/fdintino/nginx-upload-module/archive/${NGINX_UPLOAD_VERSION}.tar.gz  | tar xzf - -C /tmp  \
+    && curl -Ls http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz | tar xzf - -C /tmp \
+    && cd /tmp/nginx-${NGINX_VERSION} \
+    && ./configure --prefix=/opt --add-module=/tmp/nginx-upload-module-${NGINX_UPLOAD_VERSION} \
+    && make && make install
+
+
+# then creates the final image
+FROM alpine:${ALPINE_VERSION:-3.8} 
+
+ARG IMAGE_REPO
+ARG UID
+ARG DOCKER_GID
+
+ENV NGINX_VERSION 1.12.2	
+ENV NGINX_CONF=/etc/nginx
+ENV DOCKER_GEN_VERSION 0.7.4
+ENV URL_REDIRECTION PATH
+
+LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files download and upload"
+LABEL usage "docker run -d --name=nginx --network=udn -e HOST_HOSTNAME=\$HOSTNAME -v \$HOME/cache:/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
+
+
+RUN apk add --no-cache pcre curl && rm -rf /var/cache/apk/*
+
+# creating nginx user with same UID as build/run user and docker group
+RUN set -x && addgroup -g ${DOCKER_GID} -S nginx  && adduser -u ${UID} -D -G nginx nginx
+
+# copy nginx
+COPY --from=builder /opt /opt
+
+# download docker-gen
+RUN set -x && mkdir /opt/bin && curl -sL https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz |  tar xzf - -C /usr/bin
+
+COPY entrypoint.sh /
+COPY nginx.conf /opt/conf/
+COPY *.tmpl /opt/conf/
+
+RUN chmod +s /opt/sbin/nginx \
+    && mkdir -p /var/log/nginx /var/tmp/nginx \
+    && chown -R nginx:nginx /opt/conf /var/log/nginx /var/tmp/nginx \
+    && ln -fs /opt/conf /etc/nginx \
+    && ln -fs /opt/sbin/nginx /usr/sbin/nginx
+    
+
+USER nginx:nginx
+
+EXPOSE 80 
+
+VOLUME "/data"
+
+VOLUME "/var/run/docker.sock"
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["start"]

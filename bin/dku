@@ -338,7 +338,7 @@ function dockerBuild {
   done
   egrep -q '^VOLUME \[' $DockerDir/Dockerfile \
     && die "$TOOL_NAME does not support VOLUME in JSON format"
-  vers=$(egrep -i "^ENV ${DockerImg/alpine-}[A-Z]*_VERSION" $DockerDir/Dockerfile | awk '{print $3}')
+  vers=$(egrep -i "^ENV ${DockerImg/alpine-}[A-Z]*_VERSION" $DockerDir/Dockerfile | head -1 | awk '{print $3}')
   [[ -n $vers ]] || warn "No VERSION found in Dockerfile"
 
   # cache the files

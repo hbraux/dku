@@ -3,26 +3,31 @@ FROM alpine:${ALPINE_VERSION:-3.8}
 
 ARG IMAGE_REPO
 ARG SITE_DOWNLOAD=https://github.com/jwilder
+ARG UID
+ARG DOCKER_GID
 
 ENV NGINX_VERSION 1.12.2
+ENV NGINX_CONF=/etc/nginx
 ENV DOCKER_GEN_VERSION 0.7.4
 # Reverse proxy can redirect services from PATH (http://host.domain/service/) or from a VHOST (http://service.domain/)
 ENV URL_REDIRECTION PATH
 
 LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
-LABEL usage "docker run -d --name=nginx --network=udn -u \$UID:\$DOCKER_GID -e HOST_HOSTNAME=\$HOSTNAME -v \$HOME/cache:/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
+LABEL usage "docker run -d --name=nginx --network=udn -e HOST_HOSTNAME=\$HOSTNAME -v \$HOME/cache:/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
 
-RUN apk update && apk add --no-cache nginx curl && rm -rf /var/cache/apk/* 
+# creating nginx user with same UID as build/run user and docker group
+RUN addgroup -g $DOCKER_GID -S nginx  && adduser -u $UID -D -S -G nginx nginx
+
+RUN apk update && apk add --no-cache nginx nginx-mod-http-echo curl && rm -rf /var/cache/apk/* 
 
 # download docker-gen
 RUN set -x && curl -sL https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz |  tar xzf - -C /usr/bin 
 
 RUN mkdir -m 777 /run/nginx \
     && chmod -R 777 /etc/nginx /var/log/nginx /var/tmp/nginx /var/lib/nginx \
-    && chown root /usr/sbin/nginx && chmod +s /usr/sbin/nginx
+    && chown root /usr/sbin/nginx && chmod +s /usr/sbin/nginx 
 
-# USER can be overriden
-USER ngninx:docker
+USER nginx:nginx
 
 COPY entrypoint.sh /
 COPY *.tmpl /etc/nginx/

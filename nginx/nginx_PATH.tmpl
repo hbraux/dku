@@ -47,30 +47,39 @@ server {
     	    }
     }
  
-    location /files/ {
+    location /files {
       autoindex on;
     }
 
-    location /upload/ { 
+    location /data {
+      autoindex on;
+    }
+
+    # https://serverfault.com/questions/869821/nginx-file-uploads-where-did-the-files-go
+    location /upload { 
+      limit_except POST { deny all; }
+
       client_body_temp_path /data/files/upload;
       client_body_in_file_only on; 
       client_body_buffer_size 128K;
-      client_max_body_size 50M;
+      client_max_body_size 100M;
 
-      proxy_pass_request_headers on;
-      proxy_set_header X-FILE $request_body_file; 
-
+      proxy_pass_request_headers on;	
       proxy_set_body off;
       proxy_redirect off;
-      proxy_pass http://localhost:8080/;
-      }
+
+      echo_read_request_body;
+      echo "http://work.hostonly.com$request_body_file";
+    }
+
+
       
 {{ range $host, $containers := groupBy $ "Env.VIRTUAL_HOST"}}
 
     {{ range $container := $containers }}
 
       {{ if (eq $host "nifi") }}
-    location /{{ $host }}/ {
+    location /{{ $host }} {
        rewrite ^/{{ $host }}/(.*)$ /$1 break;
        proxy_set_header X-ProxyPort 80;
        proxy_set_header X-ProxyHost %HOST_HOSTNAME%;
@@ -79,7 +88,7 @@ server {
     }
       {{ else }}
     
-    location /{{ $host }}/ {
+    location /{{ $host }} {
        rewrite ^/{{ $host }}/(.*)$ /$1 break;
        proxy_pass http://{{ $host }};
     }
