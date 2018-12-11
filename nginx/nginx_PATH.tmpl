@@ -51,15 +51,10 @@ server {
       autoindex on;
     }
 
-    location /data {
-      autoindex on;
-    }
-
-    # https://serverfault.com/questions/869821/nginx-file-uploads-where-did-the-files-go
-    location /upload { 
+    location /_upload { 
       limit_except POST { deny all; }
 
-      client_body_temp_path /data/files/upload;
+      client_body_temp_path /upload;
       client_body_in_file_only on; 
       client_body_buffer_size 128K;
       client_max_body_size 100M;
@@ -69,7 +64,7 @@ server {
       proxy_redirect off;
 
       echo_read_request_body;
-      echo "http://work.hostonly.com$request_body_file";
+      echo "http://%HOST_HOSTNAME%/files$request_body_file";
     }
 
 

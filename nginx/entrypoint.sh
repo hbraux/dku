@@ -53,8 +53,6 @@ EOF
 }
 
 
-_setup
-
 function _start {
   _setup
   nginx 
