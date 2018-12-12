@@ -2,8 +2,8 @@ ARG ALPINE_VERSION
 FROM alpine:${ALPINE_VERSION:-3.8}
 
 ARG IMAGE_REPO
-ARG UID
-ARG DOCKER_GID
+ARG UID=101
+ARG DOCKER_GID=101
 
 ENV NGINX_VERSION 1.12.2
 ENV NGINX_CONF=/etc/nginx
@@ -15,7 +15,8 @@ LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static F
 LABEL usage "docker run -d --name=nginx --network=udn -e HOST_HOSTNAME=\$HOSTNAME -v \$HOME/cache:/data -v /var/run/docker.sock:/var/run/docker.sock -p 80:80 ${IMAGE_REPO:-local}/nginx"
 
 # creating nginx user with same UID as build/run user and docker group
-RUN addgroup -g $DOCKER_GID -S nginx  && adduser -u $UID -D -S -G nginx nginx
+RUN set -x && grep -q ":$DOCKER_GID:" /etc/group || addgroup -g $DOCKER_GID -S nginx
+RUN set -x && grep -q ":[0-9]*:$UID:" /etc/passwd || adduser -u $UID -D -S -G nginx nginx
 
 RUN apk update && apk add --no-cache nginx nginx-mod-http-echo curl && rm -rf /var/cache/apk/* 
 
