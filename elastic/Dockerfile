@@ -17,7 +17,7 @@ ENV VIRTUAL_HOST elastic
 ENV VIRTUAL_PORT 9200
 
 LABEL description "Elasticsearch ${ELASTICSEARCH_VERSION} standalone Server"
-LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn --mount source=elastic,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/elastic"
+LABEL usage "docker run -d --name ${VIRTUAL_HOST} --network udn -v elastic:/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/elastic"
 
 
 # Heap size

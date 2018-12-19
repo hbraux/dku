@@ -18,7 +18,7 @@ LABEL usage "docker run -d --name nginx --network udn -e HOST_HOSTNAME=\$HOSTNAM
 RUN set -x && grep -q ":$DOCKER_GID:" /etc/group || addgroup -g $DOCKER_GID -S nginx
 RUN set -x && grep -q ":[0-9]*:$UID:" /etc/passwd || adduser -u $UID -D -S -G nginx nginx
 
-RUN apk update && apk add --no-cache nginx nginx-mod-http-echo curl && rm -rf /var/cache/apk/* 
+RUN apk update && apk add --no-cache nginx nginx-mod-http-echo curl
 
 # download docker-gen
 RUN set -x && curl -sL https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz |  tar xzf - -C /usr/bin 
