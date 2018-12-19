@@ -401,7 +401,7 @@ function dockerRun {
        then
          opts=$(eval echo $opts)
        else
-         opts="-d --name=${DockerContainer} --network=$DKU_NETWORK_"
+         opts="-d --name ${DockerContainer} --network $DKU_NETWORK_"
          volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
          [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
          for port in $(egrep '^EXPOSE ' $DockerDir/Dockerfile | cut -c 8-)
@@ -424,7 +424,7 @@ function dockerRun {
        grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
        args=""
   else # command mode
-       opts="-i --rm --network=$DKU_NETWORK_"
+       opts="-i --rm --network $DKU_NETWORK_"
        if [[ $DockerMount -eq 1 ]] 
        then volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
 	    [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
