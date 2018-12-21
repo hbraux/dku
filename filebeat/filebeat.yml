@@ -1,0 +1,26 @@
+# see https://medium.com/@bcoste/powerful-logging-with-docker-filebeat-and-elasticsearch-8ad021aecd87
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        - condition:
+            contains:
+              docker.container.image: hbase
+          config:
+            - type: log
+              paths:
+                - "/var/lib/docker/containers/${data.docker.container.id}/*.log"
+              json.keys_under_root: true
+              json.add_error_key: true
+
+output.elasticsearch:
+  hosts: "elastic:9200"
+  index: "filebeat"
+
+setup.template.enabled: false
+#setup.template.name: filebeat
+#setup.template.pattern: "filebeat-*"
+
+
+logging.metrics.enabled: false

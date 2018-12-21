@@ -11,8 +11,8 @@ ENV HBASE_VERSION 1.2.7
 # supported Heap values: low, default, or a size
 ENV HEAP low
 
-# logging to console and daily file appender (for Filebeat collect)
-ENV HBASE_ROOT_LOGGER INFO,console,DRFA
+# logging to console and daily file appender 
+# ENV HBASE_ROOT_LOGGER INFO,console,DRFA
 
 # Server Name and Port (used by reverse proxy to expose REST API)
 ENV VIRTUAL_HOST hbase
@@ -22,13 +22,12 @@ LABEL description "HBase ${HBASE_VERSION} standalone server with Rest API"
 LABEL usage "docker run -d --name ${VIRTUAL_HOST} --network udn -e HEAP=low -v hbase:/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/hbase"
 LABEL usage_shell "docker run -it --rm --network udn ${IMAGE_REPO:-local}/hbase shell"
 
-RUN set -x && mkdir -p /opt  \
+RUN set -x && mkdir -p /opt /data \
     && curl -s ${HTTP_MIRROR}/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-bin.tar.gz | tar xzf - -C /opt \ 
     && mv /opt/hbase-${HBASE_VERSION} /opt/hbase \
-    && rm -fr /opt/hbase/docs \
-    && mkdir -p /opt/hbase/logs /data \
+    && mkdir /opt/hbase/logs \
     && adduser -DH -s /sbin/nologin hbase \
-    && chown -R hbase: /opt/hbase /data
+    && chown -R hbase: /opt/hbase /data 
 
 COPY entrypoint.sh /
 

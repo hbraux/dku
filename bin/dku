@@ -348,9 +348,7 @@ function dockerBuild {
     [[ -n $site ]] || die "Dockerfile is not using HTTP_MIRROR as ARG"
     ip=$(getent hosts $HOSTNAME | awk '{ print $1 }')
     export no_proxy=$no_proxy,$ip
-    unset no_proxy http_proxy https_proxy
     export HTTP_MIRROR=http://$ip/files
-    export USE_PROXY=off
   fi
   # check if this a real image or an intermediate image
   egrep -q '^ENTRYPOINT' $DockerDir/Dockerfile
@@ -478,6 +476,13 @@ function dockerDestroy {
   fi
 }
 
+function dockerRebuild {
+  dockerDestroy
+  dockerBuild
+  dockerRun
+  dockerLogs
+}
+
 function dockerStatus {
   dockerCheck
   opt v 
@@ -597,6 +602,7 @@ case $Command in
   logs)     getDockerImg $Arguments; dockerLogs;;
   info)     getDockerImg $Arguments; dockerInfo;;
   export)   getDockerImg $Arguments; dockerExport $Arguments;;
+  rebuild)  getDockerImg $Arguments; dockerRebuild;;
   status)   dockerStatus;;
   clean)    dockerClean;;
   *) getDockerImg $Command; dockerRun $Arguments;;
