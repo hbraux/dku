@@ -22,7 +22,8 @@ function _start {
 export -f _setup _start
 
 case $1 in
-  start) _start;;
+  start)   _start;;
+  submit)  shift; flink run -d $@;;  
   *)       exec $@;;
 esac
 
