@@ -20,11 +20,24 @@ function _start {
   
 }
 
-export -f _setup _start
+function _submit {
+  shift
+  jar=$1
+  shift
+  if [[ $1 == -c ]]; then
+    shift
+    mainclass=$1
+    shift
+    flink run -d -c $mainclass $jar $@
+  else
+    flink run -d $jar $@
+  fi
+}
+
 
 case $1 in
   start)   _start;;
-  submit)  shift; flink run -d $@;;  
+  submit)  _submit $@;;  
   *)       exec $@;;
 esac
 
