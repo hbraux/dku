@@ -6,11 +6,10 @@ ARG HTTP_MIRROR=https://downloads.lightbend.com
 
 ENV SCALA_VERSION 2.11.12
 
-
 LABEL description "Scala ${SCALA_VERSION} console"
-LABEL usage "docker run -it --rm ${IMAGE_REPO:-local}/scala"
+LABEL usage "docker run -it --rm ${IMAGE_REPO:-local}/alpine-scala"
 
-# adding 3p: libgomp for XGBoost 
+# adding 3p dependencies: libgomp for XGBoost 
 RUN apk add --no-cache libgomp 
 
 RUN set -x && mkdir -p /opt \
@@ -23,9 +22,13 @@ RUN set -x && mkdir -p /opt \
 
 ENV PATH ${PATH}:/opt/scala/bin
 
+COPY entrypoint.sh /opt/scala/bin/
+
 USER scala
 
-CMD "scala"
+ENTRYPOINT ["/opt/scala/bin/entrypoint.sh"]
+
+CMD ["scala"]
 
 
 

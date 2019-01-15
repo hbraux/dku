@@ -216,7 +216,8 @@ declare DockerDir
 declare DockerImg
 declare DockerContainer
 declare DockerVolume
-declare runJar
+declare RunJar
+declare RunOpts
 declare -i DockerTty=1
 declare -i DockerMount=0
 
@@ -241,7 +242,7 @@ commands:
  info    <alias>   : image's information
  [run]   <alias> ..: starts a container using image ('run' is optional)
  exec    <alias> ..: execute a command inside a running container
- submit  <alias> ..: submit a jar or an application to a running container
+ submit  <alias> ..: submit a jar or an application to a container
  logs    <alias>   : show container logs
  stop    <alias>   : stop a container  
  start   <alias>   : start a container  
@@ -326,19 +327,6 @@ function getDockerImg {
   DockerVolume=${DockerImg}
 }
 
-# pickup the latest assembly Jar for provided application name
-function getJar {
-  [[ $# -ge 2 ]] || usage
-  if [[ -f $2 ]]; then
-    runJar=$2
-    [[ ${runJar##*.} == "jar" ]] || die "$runJar is not a JAR file"
-  else
-    appname=$2
-    runJar=$(find $HOME/.m2 -name "$appname*-assembly.jar" -print0 | xargs -0 ls -t |  head -1)
-    [[ -f $runJar ]] || die "cannot find $appname*-assembly.jar"
-    info "Submitting $runJar"
-  fi
-}
 
 
 function dockerBuild {
@@ -402,7 +390,7 @@ function dockerRun {
   id=$(docker images -q ${DKU_REPO}/${DockerImg} |head -1)
   [[ -n $id ]] || die "image ${DockerImg} is not built"
   args=$*
-  if [[ $# -eq 0 && $(egrep -c '^ENTRYPOINT' $DockerDir/Dockerfile) -eq 1 ]] ; then 
+  if [[ $# -eq 0 && $(egrep -c 'docker run -d' $DockerDir/Dockerfile) -ge 1 ]] ; then 
     # server mode
     id=$(docker ps -a | grep "${DockerContainer}\$" | awk '{print $1}')
     if [[ -n $id ]]; then 
@@ -443,7 +431,7 @@ function dockerRun {
     args=""
   else # command mode
     # if the first argument is an application name, push the JAR to container
-    opts="-i --rm --network $DKU_NETWORK_"
+    opts="-i --rm --network $DKU_NETWORK_ $RunOpts"
     if [[ $DockerMount -eq 1 ]] 
     then volume=$(egrep '^VOLUME' $DockerDir/Dockerfile | awk '{print $2}')
 	    [[ -n $volume ]] && opts="$opts --mount source=${DockerVolume},target=$volume"
@@ -460,10 +448,10 @@ function dockerExec {
     return 1
   fi 
   shift
-  if [[ -n $runJar ]]; then
+  if [[ -n $RunJar ]]; then
     shift
-    dockJar=/tmp/${runJar##*/}
-    docker cp $runJar $id:$dockJar
+    dockJar=/tmp/${RunJar##*/}
+    docker cp $RunJar $id:$dockJar
     _docker exec $id entrypoint.sh submit $dockJar $@
   else
     _docker exec $id $@
@@ -601,6 +589,29 @@ function listBuilds {
   done
 }
 
+
+function dockerSubmit {
+  # pickup the latest assembly Jar for provided application name
+  [[ $# -ge 2 ]] || usage
+  if [[ -f $2 ]]; then
+    RunJar=$2
+    [[ ${RunJar##*.} == "jar" ]] || die "$RunJar is not a JAR file"
+  else
+    appname=$2
+    RunJar=$(find $HOME/.m2 -name "$appname*-assembly.jar" -print0 | xargs -0 ls -t |  head -1)
+    [[ -f $RunJar ]] || die "cannot find $appname*-assembly.jar"
+    info "Submitting $RunJar"
+  fi
+  # check if this is an interactive only image 
+  grep '^LABEL usage ' $DockerDir/Dockerfile | grep -q ' -d '
+  if [[ $? -eq 0 ]]; then
+    dockerExec $*
+  else
+    RunOpts="-v ${RunJar%/*}:/mnt/run --name=${DockerImg/alpine-}"
+    dockerRun submit /mnt/run/${RunJar##*/}
+  fi
+}
+
   
 # ------------------------------------------
 # Command Line
@@ -620,7 +631,7 @@ case $Command in
   list)     listBuilds;;
   build)    getDockerImg $Arguments; dockerBuild;;
   run)      getDockerImg $Arguments; dockerRun ${Arguments/$DockerImg/};;
-  submit)   getDockerImg $Arguments; getJar $Arguments; dockerExec $Arguments;;
+  submit)   getDockerImg $Arguments; dockerSubmit $Arguments;;
   destroy)  getDockerImg $Arguments; dockerDestroy;;
   start)     getDockerImg $Arguments; dockerStart;;
   stop)     getDockerImg $Arguments; dockerStop;;
