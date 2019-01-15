@@ -1,0 +1,32 @@
+ARG IMAGE_REPO
+FROM ${IMAGE_REPO}/alpine-jdk:8
+
+ARG IMAGE_REPO
+ARG HTTP_MIRROR=https://downloads.lightbend.com
+
+ENV SCALA_VERSION 2.11.12
+
+
+LABEL description "Scala ${SCALA_VERSION} console"
+LABEL usage "docker run -it --rm ${IMAGE_REPO:-local}/scala"
+
+# adding 3p: libgomp for XGBoost 
+RUN apk add --no-cache libgomp 
+
+RUN set -x && mkdir -p /opt \
+    && curl -s ${HTTP_MIRROR}/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz | tar xzf - -C /opt \
+    && mv /opt/scala-${SCALA_VERSION} /opt/scala \
+    && JAVA_VERSION=$(java -version 2>&1 | sed -n 's/openjdk version "\(.*\)"/\1/p') \
+    && echo "JAVA_VERSION=$JAVA_VERSION" > $JAVA_HOME/release \
+    && adduser -DH -s /sbin/nologin scala \
+    && chown -R scala: /opt/scala
+
+ENV PATH ${PATH}:/opt/scala/bin
+
+USER scala
+
+CMD "scala"
+
+
+
+
