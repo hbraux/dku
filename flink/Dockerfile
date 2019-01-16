@@ -8,7 +8,7 @@ ENV FLINK_VERSION 1.7.1
 ENV FLINK_BUILD scala_2.11
 
 # supported values: low (512m), default (1G), or a size
-ENV HEAP low
+ENV HEAP default
 
 # Server Name and Port (used by reverse proxy to expose REST API)
 ENV VIRTUAL_HOST flink
@@ -18,8 +18,9 @@ LABEL description "Flink ${FLINK_VERSION} standalone server"
 LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mount source=flink,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
 
 # adding libgomp for XGBoost 
-RUN set -x && apk add --no-cache libgomp \
-    && mkdir -p /opt  \
+RUN apk add --no-cache libgomp
+
+RUN set -x && mkdir -p /opt  \
     && curl -s ${HTTP_MIRROR}/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-${FLINK_BUILD}.tgz | tar xzf - -C /opt \ 
     && mv /opt/flink-${FLINK_VERSION} /opt/flink \
     && cp /opt/flink/examples/streaming/WordCount.jar /opt/flink \

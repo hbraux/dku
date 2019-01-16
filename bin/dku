@@ -494,6 +494,8 @@ function dockerRebuild {
   dockerDestroy
   dockerBuild
   dockerRun
+  # wait for container to start
+  sleep 4
   dockerLogs
 }
 
