@@ -7,15 +7,15 @@ ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 ENV FLINK_VERSION 1.7.1
 ENV FLINK_BUILD scala_2.11
 
-# supported values: low (512m), default (1G), or a size
-ENV HEAP default
+# supported values: low (256m), default (1G), or a size
+ENV HEAP low
 
 # Server Name and Port (used by reverse proxy to expose REST API)
 ENV VIRTUAL_HOST flink
 ENV VIRTUAL_PORT 8081
 
 LABEL description "Flink ${FLINK_VERSION} standalone server"
-LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=low --mount source=flink,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
+LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=$HEAP --mount source=flink,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
 
 # adding libgomp for XGBoost 
 RUN apk add --no-cache libgomp

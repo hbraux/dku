@@ -6,7 +6,7 @@ ARG HTTP_MIRROR=https://downloads.lightbend.com
 
 ENV SCALA_VERSION 2.12.8
 
-LABEL description "Scala ${SCALA_VERSION} console"
+LABEL description "Alpine Scala ${SCALA_VERSION} console"
 LABEL usage "docker run -it --rm ${IMAGE_REPO:-local}/alpine-scala"
 
 # adding 3p dependencies: libgomp for XGBoost 
