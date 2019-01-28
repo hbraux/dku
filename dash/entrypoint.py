@@ -58,3 +58,4 @@ if __name__ == '__main__':
     read_kafka_json(sys.argv[2], sys.argv[3])
     run_app()
 
+
