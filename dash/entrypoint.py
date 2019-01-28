@@ -28,9 +28,12 @@ datax = []
 datay = []
 
 def read_kafka_json(broker, topic):
-    consumer = KafkaConsumer(topic, bootstrap_servers=[broker], auto_offset_reset='earliest')
-    for message in consumer:
-        j = json.loads(message.value)
+    consumer = KafkaConsumer(topic,
+                             bootstrap_servers=[broker],
+                             auto_offset_reset='earliest',
+                             value_deserializer=lambda m: json.loads(m.decode('ascii')),
+                             consumer_timeout_ms=100)
+    for j in consumer:
         ts= j['ts']
         lat=j['out']-ts
         datax.append(datetime.fromtimestamp(ts/1000))
@@ -49,9 +52,9 @@ def run_app():
 
 
 if __name__ == '__main__':
-    if length(sys.argv) == 0:
-        print("usage: dash.py kafka <broker> <topic>")
+    if len(sys.argv) < 4:
+        print("usage: kafka <broker> <topic>")
         sys.exit(1)
-    read_kafka_json(sys.argv[1], sys.argv[2])
+    read_kafka_json(sys.argv[2], sys.argv[3])
     run_app()
 

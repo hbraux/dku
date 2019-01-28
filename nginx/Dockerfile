@@ -2,8 +2,8 @@ ARG ALPINE_VERSION
 FROM alpine:${ALPINE_VERSION:-3.8}
 
 ARG IMAGE_REPO
-ARG UID=101
-ARG DOCKER_GID=101
+ARG UID=1001
+ARG DOCKER_GID=100
 
 ENV NGINX_VERSION 1.12.2
 ENV NGINX_CONF=/etc/nginx
@@ -23,10 +23,11 @@ RUN apk update && apk add --no-cache nginx nginx-mod-http-echo curl
 # download docker-gen
 RUN set -x && curl -sL https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz |  tar xzf - -C /usr/bin 
 
-RUN mkdir -m 777 /run/nginx  \
+RUN mkdir -m 777 /run/nginx \
     && chmod -R 777 /etc/nginx /var/log/nginx /var/tmp/nginx /var/lib/nginx \
     && chown root /usr/sbin/nginx && chmod +s /usr/sbin/nginx \
     && ln -fs /data/files/upload /upload
+
 
 USER nginx:nginx
 

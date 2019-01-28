@@ -4,11 +4,11 @@ FROM ${IMAGE_REPO}/alpine-jdk:8
 ARG IMAGE_REPO
 ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
 
-ENV FLINK_VERSION 1.7.1
-ENV FLINK_BUILD scala_2.11
+ENV FLINK_VERSION 1.6.3
+ENV FLINK_BUILD hadoop28-scala_2.11
 
 # supported values: low (256m), default (1G), or a size
-ENV HEAP low
+ENV HEAP default
 
 # Server Name and Port (used by reverse proxy to expose REST API)
 ENV VIRTUAL_HOST flink

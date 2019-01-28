@@ -7,7 +7,6 @@ TOOL_NAME=kafka-json
 # Constants
 # ------------------------------------------
 
-POST_EVERY=1000
 COUNT_EVERY=1000
 SAVE_FILE=output.json
 
@@ -18,6 +17,7 @@ SAVE_FILE=output.json
 declare -i Delay=0
 declare -i Count=1
 declare -i Console=0
+declare -i Post=10000
 declare Brokers
 declare Protocol=""
 
@@ -35,6 +35,7 @@ When BROKERS is not provided environment variable \$SITE_KAFKA is used
 Supported options:
   --console : output messages to console (do not publish)
   --count N : generate N messages
+  --post  P : post messages every P messages (default is 10000)
   --delay D : delay in seconds between each message (none by default)
 
 Supported values:
@@ -89,7 +90,7 @@ function json {
       echo $json >>$tmpfile
       if [[ $Console -eq  0 ]]; then
 	[[ $((n % $COUNT_EVERY)) -eq 0 ]] && echo -e "$(($n / $countpercent))% \c"
-	if [[ $((n % $POST_EVERY)) -eq 0 ]]; then 
+	if [[ $((n % $Post)) -eq 0 ]]; then 
 	  echo -e "(posting) \c"
 	  kafka-console-producer.sh --broker-list $Brokers $Protocol --topic $topic --request-required-acks 1 <$tmpfile >/dev/null
 	  rm -f $tmpfile
@@ -118,6 +119,7 @@ do
   case ${1:2} in 
     count) Count=$2; shift;;
     delay) Delay=$2; shift;;
+    post)  Post=$2; shift;;
     console)  Console=1;;
     *) usage;
   esac
