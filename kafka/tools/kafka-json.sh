@@ -7,7 +7,7 @@ TOOL_NAME=kafka-json
 # Constants
 # ------------------------------------------
 
-POST_EVERY=10000
+POST_EVERY=1000
 COUNT_EVERY=1000
 SAVE_FILE=output.json
 
@@ -33,7 +33,7 @@ Syntax: $TOOL_NAME.sh [options] [BROKERS] TOPIC KEY=VALUE KEY=VALUE ...
 When BROKERS is not provided environment variable \$SITE_KAFKA is used
 
 Supported options:
-  --console : output messaes to console (do not publish)
+  --console : output messages to console (do not publish)
   --count N : generate N messages
   --delay D : delay in seconds between each message (none by default)
 
@@ -43,7 +43,8 @@ Supported values:
  - %seq   : incremental sequence, starting at 1000000
  - %uuid  : uuid  
  - %now   : current date in ISO8601 format
- - %rands : random string
+ - %randk : random key (10 char)
+ - %rands : random string (40 char)
  - %randi : random integer
 "
   exit
@@ -64,7 +65,7 @@ function json {
   n=0
   seq=1000000
   randomchars=$(head -1000 /dev/urandom | tr -dc [:alnum:])
-  [[ $Delay -eq 0 ]] && [[ $Count -ge $COUNT_EVERY ]] && info "Generating messages ... \c"
+  [[ $Delay -eq 0 ]] && [[ $Count -ge $COUNT_EVERY ]] && echo -e "Generating messages ... \c"
   countpercent=$(($Count / 100))
   tmpfile=$HOME/tmp.${TOOL_NAME}_f$$
   while [[ $n -lt $Count ]]; do
@@ -72,7 +73,8 @@ function json {
     seq=$((seq + 1))
     now=$(date '+%FT%H:%M:%S')
     uuid=$(cat /proc/sys/kernel/random/uuid)
-    rands=${randomchars:$RANDOM:20}
+    randk=${randomchars:$RANDOM:10}
+    rands=${randomchars:$RANDOM:40}
     randi=$RANDOM
     eval "json=$msg"
     json=${json//\~/\"}
@@ -86,9 +88,9 @@ function json {
     else 
       echo $json >>$tmpfile
       if [[ $Console -eq  0 ]]; then
-	[[ $((n % $COUNT_EVERY)) -eq 0 ]] && echo "$(($n / $countpercent))% \c"
+	[[ $((n % $COUNT_EVERY)) -eq 0 ]] && echo -e "$(($n / $countpercent))% \c"
 	if [[ $((n % $POST_EVERY)) -eq 0 ]]; then 
-	  echo "(posting) \c"
+	  echo -e "(posting) \c"
 	  kafka-console-producer.sh --broker-list $Brokers $Protocol --topic $topic --request-required-acks 1 <$tmpfile >/dev/null
 	  rm -f $tmpfile
 	fi
@@ -100,7 +102,7 @@ function json {
     if [[ $Console -eq 1 ]]; then
       cat $tmpfile
     else
-      [[ $Delay -eq 0 && $Count -ge $COUNT_EVERY ]] && echo "(posting)"
+      [[ $Delay -eq 0 && $Count -ge $COUNT_EVERY ]] && echo -e "(posting)"
       kafka-console-producer.sh --broker-list $Brokers $Protocol --topic $topic --request-required-acks 1 <$tmpfile >/dev/null
     fi
     rm -f $tmpfile
