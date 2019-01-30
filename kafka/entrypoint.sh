@@ -17,7 +17,7 @@ function _start {
   # starting kafka
   [[ $HEAP == low ]] && heapsize=256m
   egrep -q '[0-9]+[kmg]'<<<$HEAP && heapsize=$HEAP
-  export KAFKA_HEAP_OPTS="-Xmx${heapsize} -Xms${heapsize}" 
+  [[ -n $heapsize ]] && export KAFKA_HEAP_OPTS="-Xmx${heapsize} -Xms${heapsize}" 
   exec bin/kafka-server-start.sh config/server.properties
 }
 

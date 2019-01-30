@@ -8,7 +8,8 @@ function _setup {
     sed -i 's/heap.size: 1024m/heap.size: 512m/g' conf/flink-conf.yaml
   fi
   sed -i 's/^# state.backend.incremental:.*/state.backend.incremental: true/' conf/flink-conf.yaml
-  echo "state.checkpoints.num-retained: 3" >>conf/flink-conf.yaml
+  echo "state.checkpoints.num-retained: $CHECKPOINTS_RETAINED" >>conf/flink-conf.yaml
+  echo "state.backend.rocksdb.checkpoint.transfer.thread.num: 2" >>conf/flink-conf.yaml
   touch .setup
 }
 

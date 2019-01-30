@@ -10,7 +10,8 @@
 import os
 import sys
 import json
-from datetime import datetime
+import uuid
+from datetime import datetime, timezone
 
 try:
     import dash
@@ -30,25 +31,28 @@ datay = []
 def read_kafka_json(broker, topic):
     consumer = KafkaConsumer(topic,
                              bootstrap_servers=[broker],
+                             group_id=str(uuid.uuid4()),
                              auto_offset_reset='earliest',
-                             value_deserializer=lambda m: json.loads(m.decode('ascii')),
-                             consumer_timeout_ms=100)
-    for j in consumer:
-        ts= j['ts']
-        lat=j['out']-ts
+                             consumer_timeout_ms=1000)
+    print("Reading Kafka topic", topic)
+    for msg in consumer:
+        j=json.loads(msg.value.decode('ascii'))
+        ts= j['create_dt']
+        lat=j['out_dt']-ts
         datax.append(datetime.fromtimestamp(ts/1000))
-        datay.append(lat)
+        datay.append(lat) 
+    print("Points read",len(datax))
 
 def run_app():
     app = dash.Dash(__name__)
     app.layout = html.Div(children=[
         html.H1(children='Flink Processing Time'),
         dcc.Graph(id='graph', figure={
-            'data': [go.Scatter(x=datax, y=datay, mode='markers')],
+            'data': [go.Scattergl(x=datax, y=datay, mode='markers')],
             'layout': go.Layout(yaxis={'title': 'ms'})
         })
     ])
-    app.run_server(host='0.0.0.0',debug=True)
+    app.run_server(host='0.0.0.0',debug=False)
 
 
 if __name__ == '__main__':

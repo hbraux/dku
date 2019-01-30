@@ -279,6 +279,8 @@ function dockerCheck {
   if [[ $? -ne 0 ]]; then
     info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network '$DKU_NETWORK_ (required for DNS resolution between containers)."
     docker network create --driver bridge $DKU_NETWORK_ || die
+    # create the cache directory for Nginx
+    mkdir -p $HOME/cache
     echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
   fi

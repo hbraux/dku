@@ -1,5 +1,6 @@
 #!/bin/bash
 # KAFKA JSON message generator
+# THIS TOOL IS OBSOLETE. USE THE PYTHON VERSION
 
 TOOL_NAME=kafka-json
 
