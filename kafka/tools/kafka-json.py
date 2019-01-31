@@ -48,7 +48,7 @@ def kafka_gen(brokers, topic, template):
         else:
             raise Exception("unknown tag", tag)
     if not Debug:
-        producer = KafkaProducer(bootstrap_servers=brokers.split(","),
+        producer = KafkaProducer(bootstrap_servers=brokers,
                                  value_serializer=lambda m:
                                  json.dumps(m).encode('ascii'))
     count = 0
@@ -84,4 +84,4 @@ Options
   --delay ms
 """)
         sys.exit(1)
-    kafka_gen(sys.argv[argp], sys.argv[argp+1], sys.argv[argp+2])
+    kafka_gen(sys.argv[argp].split(","), sys.argv[argp+1], sys.argv[argp+2])
