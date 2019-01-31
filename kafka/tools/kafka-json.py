@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 # This program needs python3.6+ and kafka-python 
+#
+# Generic JSON message producer
+# Expected arguments:
+#  1) broker
+#  2) topic
+#  3) delay (between each message in in ms)
+#  4) JSON message
+# The JSON can contain tags such as %UUID, %STRl, %INTnnnn which respectivly
+# generate a random UUID, String of length l and INT betwenn 0 and nnnn
 
+# TODO: multiple brokers, delay as an option, help, debug mode
 
 import os
 import sys

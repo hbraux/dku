@@ -21,7 +21,7 @@ LABEL description "Flink ${FLINK_VERSION} standalone server"
 LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=$HEAP --mount source=flink,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
 
 # adding libgomp for XGBoost 
-RUN apk add --no-cache libgomp
+RUN apk add --no-cache libgomp htop
 
 RUN set -x && mkdir -p /opt  \
     && curl -s ${HTTP_MIRROR}/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-${FLINK_BUILD}.tgz | tar xzf - -C /opt \ 
