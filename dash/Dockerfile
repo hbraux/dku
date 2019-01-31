@@ -13,9 +13,9 @@ RUN pip install dash_core_components dash_html_components ${BUILD_PACKAGES/,/ }
 
 EXPOSE 8050
 
-COPY entrypoint.py /
+COPY *.py /
 
-ENTRYPOINT ["/entrypoint.py"]
+ENTRYPOINT ["/webapp.py"]
 
 CMD ["help"]
 

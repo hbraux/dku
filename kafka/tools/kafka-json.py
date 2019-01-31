@@ -55,7 +55,7 @@ def kafka_gen(brokers, topic, template):
     while(True):
         if not Debug and count % 1000 == 0:
             now = datetime.now().strftime("%H:%M:%S")
-            print(now, count, "message posted on topic: ", topic,
+            print(now, count, "message posted on topic:", topic,
                   "(type CTRL^C to stop the process)")
         args = [f() for f in funcs]
         j = json.loads(template.format(*args))
