@@ -18,7 +18,7 @@ LABEL usage "docker run -d --name=${SERVER_NAME} --network=udn -e HEAP=low --mou
 LABEL usage_newtopic "docker run -it --rm --network=udn ${IMAGE_REPO:-local}/kafka kafka-topics.sh --zookeeper kafka:2181 --create --topic mytopic --partitions 1 --replication-factor 1"
 LABEL usage_consolep "docker run -it --rm --network=udn ${IMAGE_REPO:-local}/kafka kafka-console-producer.sh --broker-list kafka:9092 --topic mytopic"
 LABEL usage_consolec "docker run -it --rm --network=udn ${IMAGE_REPO:-local}/kafka kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic mytopic --from-beginning"
-LABEL usage_jsonmsg "docker run  -it --rm --network=udn ${IMAGE_REPO:-local}/kafka kafka-json.py kafka:9092 mytopic 10 '{\"uuid\":\"%UUID\",\"pkey\":\"%STR3\",\"skey\":\"%STR4\",\"value\":%INT99999}'"
+LABEL usage_jsonmsg "docker run  -it --rm --network=udn ${IMAGE_REPO:-local}/kafka kafka-json.py kafka:9092 mytopic '{\"uuid\":\"%UUID\",\"key\":\"%STR6\",\"value\":%INT9999}'"
 
 RUN set -x && mkdir -p /opt && mkdir -p /data  \
     && curl -s ${HTTP_MIRROR}/dist/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz | tar xzf - -C /opt \
