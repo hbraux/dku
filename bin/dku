@@ -274,7 +274,7 @@ function _docker {
 function dockerCheck {
   getProxy
   which docker >/dev/null 2>&1 || die "Docker not installed"
-  id | grep -q '(docker)' || die "$USER deos not be belong to docker group"
+  id | grep -q '(docker)' || die "$USER does not be belong to docker group"
   _docker network ls | grep -q $DKU_NETWORK_ 
   if [[ $? -ne 0 ]]; then
     info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network '$DKU_NETWORK_ (required for DNS resolution between containers)."
@@ -595,14 +595,19 @@ function listBuilds {
 
 
 function dockerSubmit {
-  # pickup the latest assembly Jar for provided application name
   [[ $# -ge 2 ]] || usage
   if [[ -f $2 ]]; then
-    RunJar=$2
-    [[ ${RunJar##*.} == "jar" ]] || die "$RunJar is not a JAR file"
+      RunJar=$2
+      [[ ${RunJar##*.} == "jar" ]] || die "$RunJar is not a JAR file"
   else
     appname=$2
-    RunJar=$(find $HOME/.m2 -name "$appname*-assembly.jar" -print0 | xargs -0 ls -t |  head -1)
+    libdir=$HOME/.m2
+    if [[ $appname == - ]] ; then 
+        [[ -f build.sbt ]] || die "No argument provided and no build.sbt"
+        appname=$(grep '^name ' build.sbt  | sed  's/.* "//;s/" *//')
+        libdir=.
+    fi
+    RunJar=$(find $libdir -name "$appname*assembly*.jar" -print0 | xargs -0 ls -t |  grep $appname | head -1)
     [[ -f $RunJar ]] || die "cannot find $appname*-assembly.jar"
     info "Submitting $RunJar"
   fi
