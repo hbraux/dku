@@ -267,7 +267,7 @@ function getProxy {
 
 # small helper to display the docker command being run
 function _docker {
-  info "\$ docker $*"
+  opt q || info "\$ docker $*"
   docker $*
 }
 
@@ -629,10 +629,10 @@ function dockerSubmit {
 
 # analyse command line
 if [[ $# -eq 0 ]]; then 
-  init -fv status
+  init -fvq status
 else 
   [[ $1 == -h ]] && usage
-  init -fvc $@
+  init -fvcq $@
 fi
 
 case $Command in

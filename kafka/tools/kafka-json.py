@@ -26,8 +26,8 @@ except ImportError as err:
     sys.exit(1)
 
 Debug = False  # Debug output the message to console
-Delay = 10     # default delay
-
+Delay = 10     # default delay in ms
+Count = sys.maxsize  # never stops
 
 def kafka_gen(brokers, topic, template):
     tags = re.findall("%[A-Z]+[0-9]*", template)
@@ -51,37 +51,46 @@ def kafka_gen(brokers, topic, template):
         producer = KafkaProducer(bootstrap_servers=brokers,
                                  value_serializer=lambda m:
                                  json.dumps(m).encode('ascii'))
-    count = 0
-    while(True):
-        if not Debug and count % 1000 == 0:
+    cnt = 0
+    while cnt < Count:
+        if not Debug and cnt % 1000 == 0:
             now = datetime.now().strftime("%H:%M:%S")
-            print(now, count, "message posted on topic:", topic,
+            print(now, cnt, "message posted on topic:", topic,
                   "(type CTRL^C to stop the process)")
         args = [f() for f in funcs]
         j = json.loads(template.format(*args))
         if Debug:
-            print("#", j)
+            print(str(j).replace("'","\""))
         else:
             producer.send(topic, j)
         time.sleep(Delay/1000.0)
-        count += 1
+        cnt += 1
 
 
 if __name__ == '__main__':
     argp = 1
-    if (len(sys.argv) > argp and sys.argv[argp] == "--debug"):
-        Debug = True
-        argp += 1
-    if (len(sys.argv) > argp+1 and sys.argv[argp] == "--delay"):
-        Delay = int(sys.argv[argp+1])
-        argp += 2
+    while len(sys.argv) > argp and sys.argv[argp][0:2] == "--":
+        if sys.argv[argp] == "--debug":
+            Debug = True
+            argp += 1
+        elif sys.argv[argp] == "--delay":
+            Delay = int(sys.argv[argp+1])
+            argp += 2
+        elif sys.argv[argp] == "--count":
+            Count = int(sys.argv[argp+1])
+            argp += 2
+        elif sys.argv[argp] == "--seed":
+            random.seed(int(sys.argv[argp+1]))
+            argp += 2
     if len(sys.argv) < argp+3:
         print("""
 Usage: kafka-json.py [options] <broker(s)> <topic> <json msg>
 
 Options
-  --debug
-  --delay ms
+  --debug (print to stdout only)
+  --delay INT (ms)
+  --seed INT
+  --count INT
 """)
         sys.exit(1)
     kafka_gen(sys.argv[argp].split(","), sys.argv[argp+1], sys.argv[argp+2])
