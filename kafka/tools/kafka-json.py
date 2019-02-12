@@ -35,7 +35,7 @@ def usage(exitcode):
 Usage: kafka-json.py [options] <broker(s)> <topic> <json msg>
 
 Options
-  --debug (print to stdout only)
+  --stdout (messages to stdout instead of kafka)
   --delay INT (ms)
   --seed INT
   --count INT
