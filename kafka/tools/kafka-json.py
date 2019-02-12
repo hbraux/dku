@@ -35,7 +35,7 @@ def usage(exitcode):
 Usage: kafka-json.py [options] <broker(s)> <topic> <json msg>
 
 Options
-  --stdout (messages to stdout instead of kafka)
+  --stdout (messages are also printed to console)
   --delay INT (ms)
   --seed INT
   --count INT
@@ -66,26 +66,23 @@ def kafka_gen(brokers, topic, template):
                          "".join(random.choices(string.ascii_uppercase, k=n)))
         else:
             raise Exception("unknown tag", tag)
-    if not Stdout:
-        producer = KafkaProducer(bootstrap_servers=brokers,
-                                 value_serializer=lambda m:
-                                 json.dumps(m).encode('ascii'))
+    producer = KafkaProducer(bootstrap_servers=brokers,
+                             value_serializer=lambda m:
+                             json.dumps(m).encode('ascii'))
     cnt = 0
     while cnt < Count:
         args = [f() for f in funcs]
         j = json.loads(template.format(*args))
+        producer.send(topic, j)
         if Stdout:
             print(str(j).replace("'","\""))
-        else:
-            producer.send(topic, j)
         time.sleep(Delay/1000.0)
         cnt += 1
         if not Stdout and cnt % 1000 == 0:
             now = datetime.now().strftime("%H:%M:%S")
             print(now, cnt, "message posted on topic:", topic,
                   "(type CTRL^C to stop the process)")
-    if not Stdout:
-        producer.flush()
+    producer.flush()
 
 
 def kafka_dump(brokers, topic):
@@ -113,7 +110,6 @@ if __name__ == '__main__':
     while len(sys.argv) > argp and sys.argv[argp][0:2] == "--":
         if sys.argv[argp] == "--stdout":
             Stdout = True
-            Delay = 0
             argp += 1
         elif sys.argv[argp] == "--delay":
             Delay = int(sys.argv[argp+1])
