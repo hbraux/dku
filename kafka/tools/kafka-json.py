@@ -20,14 +20,30 @@ import string
 from datetime import datetime
 
 try:
-    from kafka import KafkaProducer
+    from kafka import KafkaProducer, KafkaConsumer
 except ImportError as err:
     print(err)
     sys.exit(1)
 
 Debug = False  # Debug output the message to console
 Delay = 10     # default delay in ms
-Count = sys.maxsize  # never stops
+Count = sys.maxsize  
+Dump = None    # dump a topic to console
+
+
+def usage(exitcode):
+    print("""# Generic JSON message producer
+Usage: kafka-json.py [options] <broker(s)> <topic> <json msg>
+
+Options
+  --debug (print to stdout only)
+  --delay INT (ms)
+  --seed INT
+  --count INT
+  --dump FORMAT (dump JSON messages from a topic, supported format: json csv)
+""")
+    sys.exit(exitcode)
+
 
 def kafka_gen(brokers, topic, template):
     tags = re.findall("%[A-Z]+[0-9]*", template)
@@ -53,10 +69,6 @@ def kafka_gen(brokers, topic, template):
                                  json.dumps(m).encode('ascii'))
     cnt = 0
     while cnt < Count:
-        if not Debug and cnt % 1000 == 0:
-            now = datetime.now().strftime("%H:%M:%S")
-            print(now, cnt, "message posted on topic:", topic,
-                  "(type CTRL^C to stop the process)")
         args = [f() for f in funcs]
         j = json.loads(template.format(*args))
         if Debug:
@@ -65,10 +77,34 @@ def kafka_gen(brokers, topic, template):
             producer.send(topic, j)
         time.sleep(Delay/1000.0)
         cnt += 1
+        if not Debug and cnt % 1000 == 0:
+            now = datetime.now().strftime("%H:%M:%S")
+            print(now, cnt, "message posted on topic:", topic,
+                  "(type CTRL^C to stop the process)")
+    producer.flush()
 
+def kafka_dump(brokers, topic):
+    consumer = KafkaConsumer(
+        topic,
+        bootstrap_servers=brokers,
+        group_id=None,
+        auto_offset_reset='earliest',
+        enable_auto_commit=False,
+        value_deserializer=lambda m:json.loads(m.decode('ascii')),
+        consumer_timeout_ms=1000)
+    for msg in consumer:
+        if Dump == 'json':
+            print(str(msg.value).replace("'","\""))
+        elif Dump == 'csv':
+            print(",".join([str(v) for k, v in msg.value.items()]))
+        else:
+            raise Exception("unsupported dump format", Dump)
 
+        
 if __name__ == '__main__':
     argp = 1
+    if (len(sys.argv) == 0):
+        usage(0)
     while len(sys.argv) > argp and sys.argv[argp][0:2] == "--":
         if sys.argv[argp] == "--debug":
             Debug = True
@@ -81,16 +117,16 @@ if __name__ == '__main__':
             argp += 2
         elif sys.argv[argp] == "--seed":
             random.seed(int(sys.argv[argp+1]))
-            argp += 2
-    if len(sys.argv) < argp+3:
-        print("""
-Usage: kafka-json.py [options] <broker(s)> <topic> <json msg>
-
-Options
-  --debug (print to stdout only)
-  --delay INT (ms)
-  --seed INT
-  --count INT
-""")
-        sys.exit(1)
-    kafka_gen(sys.argv[argp].split(","), sys.argv[argp+1], sys.argv[argp+2])
+            argp += 2 
+        elif sys.argv[argp] == "--dump":
+            Dump = sys.argv[argp+1]
+            argp += 2 
+    if Dump:
+        if len(sys.argv) < argp+2:
+            usage(1)
+        kafka_dump(sys.argv[argp].split(","), sys.argv[argp+1])
+    else:
+        if len(sys.argv) < argp+3:
+            usage(1)
+        kafka_gen(sys.argv[argp].split(","), sys.argv[argp+1],
+                  sys.argv[argp+2])
