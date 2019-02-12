@@ -25,11 +25,10 @@ except ImportError as err:
     print(err)
     sys.exit(1)
 
-Debug = False  # Debug output the message to console
+Stdout = False # output messages to console instead of topic
 Delay = 10     # default delay in ms
-Count = sys.maxsize  
 Dump = None    # dump a topic to console
-
+Count = sys.maxsize   # by default, generator does not end
 
 def usage(exitcode):
     print("""# Generic JSON message producer
@@ -54,6 +53,10 @@ def kafka_gen(brokers, topic, template):
         template = template.replace(tag, "{}", 1)
         if (tag == "%UUID"):
             funcs.append(lambda: str(uuid.uuid4()))
+        # pseudo Unique ID using the seed
+        elif (tag[0:4] == "%UID"):
+            n = int(tag[4:])
+            funcs.append(lambda n=n: ''.join(random.choice(string.ascii_lowercase) for _ in range(n)))
         elif (tag[0:4] == "%INT"):
             n = int(tag[4:]) + 1
             funcs.append(lambda n=n: random.randint(0, n))
@@ -63,7 +66,7 @@ def kafka_gen(brokers, topic, template):
                          "".join(random.choices(string.ascii_uppercase, k=n)))
         else:
             raise Exception("unknown tag", tag)
-    if not Debug:
+    if not Stdout:
         producer = KafkaProducer(bootstrap_servers=brokers,
                                  value_serializer=lambda m:
                                  json.dumps(m).encode('ascii'))
@@ -71,17 +74,19 @@ def kafka_gen(brokers, topic, template):
     while cnt < Count:
         args = [f() for f in funcs]
         j = json.loads(template.format(*args))
-        if Debug:
+        if Stdout:
             print(str(j).replace("'","\""))
         else:
             producer.send(topic, j)
         time.sleep(Delay/1000.0)
         cnt += 1
-        if not Debug and cnt % 1000 == 0:
+        if not Stdout and cnt % 1000 == 0:
             now = datetime.now().strftime("%H:%M:%S")
             print(now, cnt, "message posted on topic:", topic,
                   "(type CTRL^C to stop the process)")
-    producer.flush()
+    if not Stdout:
+        producer.flush()
+
 
 def kafka_dump(brokers, topic):
     consumer = KafkaConsumer(
@@ -106,8 +111,9 @@ if __name__ == '__main__':
     if (len(sys.argv) == 0):
         usage(0)
     while len(sys.argv) > argp and sys.argv[argp][0:2] == "--":
-        if sys.argv[argp] == "--debug":
-            Debug = True
+        if sys.argv[argp] == "--stdout":
+            Stdout = True
+            Delay = 0
             argp += 1
         elif sys.argv[argp] == "--delay":
             Delay = int(sys.argv[argp+1])
