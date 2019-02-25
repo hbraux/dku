@@ -5,7 +5,7 @@ FROM ${IMAGE_REPO}/alpine-jdk:8
 ARG IMAGE_REPO
 ARG HTTP_MIRROR=https://artifacts.elastic.co
 
-ENV ELASTICSEARCH_VERSION 5.6.6
+ENV ELASTICSEARCH_VERSION 6.6.1
 
 # supported values: low, default, or a size
 ENV HEAP low

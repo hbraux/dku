@@ -4,6 +4,7 @@ FROM alpine:${ALPINE_VERSION:-3.8}
 ARG IMAGE_REPO
 ARG UID=1000
 ARG DOCKER_GID=999
+ARG DOCKER_DATADIR=/data
 
 ENV NGINX_VERSION 1.12.2
 ENV NGINX_CONF=/etc/nginx
@@ -12,7 +13,7 @@ ENV DOCKER_GEN_VERSION 0.7.4
 ENV URL_REDIRECTION PATH
 
 LABEL description "Nginx ${NGINX_VERSION} server with Reverse Proxy and Static Files support"
-LABEL usage "docker run -d --name nginx --network udn -e HOST_HOSTNAME=\$HOSTNAME -v \$HOME/cache:/data -v /var/run/docker.sock:/var/run/docker.sock:ro -p 80:80 ${IMAGE_REPO:-local}/nginx"
+LABEL usage "docker run -d --name nginx --network udn -e HOST_HOSTNAME=\$HOSTNAME -v ${DOCKER_DATADIR}/nginx:/data -v /var/run/docker.sock:/var/run/docker.sock:ro -p 80:80 ${IMAGE_REPO:-local}/nginx"
 
 # (very dirty) creating nginx user with same UID as build/run user and docker group
 RUN sed -i "/.*:$DOCKER_GID:.*/d" /etc/group && addgroup -g $DOCKER_GID -S nginx

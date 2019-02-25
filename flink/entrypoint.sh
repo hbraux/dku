@@ -1,24 +1,23 @@
 #!/bin/bash
 
+
 function _setup {
   [[ -f .setup ]] && return
-  sed -i 's/^#jobmanager.web.address:.*/jobmanager.web.address: 0.0.0.0/' conf/flink-conf.yaml
-  sed -i 's~^# io.tmp.dirs: /tmp*~io.tmp.dirs: /data~' conf/flink-conf.yaml
-  if [[ $HEAP == low ]]; then 
-    sed -i 's/heap.size: 1024m/heap.size: 512m/g' conf/flink-conf.yaml
-  fi
+  # sed -i 's/^#jobmanager.web.address:.*/jobmanager.web.address: 0.0.0.0/' $FLINK_HOME/conf/flink-conf.yaml
+  [[ -n $FLINK_IO_TMPDIR ]] && echo "io.tmp.dirs: $FLINK_IO_TMPDIR" >> $FLINK_HOME/conf/flink-conf.yaml
   touch .setup
 }
 
 
 function _start {
   _setup
-  # load the env
+  # bin/taskmanager.start not working !? W/A:
   . /opt/flink/bin/config.sh
   TMSlaves start
   exec bin/jobmanager.sh start-foreground
   
 }
+
 
 function _submit {
   shift
@@ -40,4 +39,3 @@ case $1 in
   submit)  _submit $@;;  
   *)       exec $@;;
 esac
-

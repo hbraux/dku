@@ -2,47 +2,44 @@ ARG IMAGE_REPO
 FROM ${IMAGE_REPO}/alpine-jdk:8
 
 ARG IMAGE_REPO
-ARG HTTP_MIRROR=http://apache.mirrors.ovh.net/ftp.apache.org
+ARG HTTP_MIRROR=https://archive.apache.org
+ARG DOCKER_DATADIR=/data
+ARG UID=1000
+ARG GID=1000
 
-ENV FLINK_VERSION 1.6.3
+ENV FLINK_VERSION 1.6.1
 ENV FLINK_BUILD hadoop28-scala_2.11
+ENV FLINK_HOME /opt/flink
+ENV FLINK_JM_HEAP=256m
+ENV FLINK_TM_HEAP=1024m
 
-# supported values: low (256m), default (1G), or a size
-ENV HEAP low
+ENV PATH $PATH:$FLINK_HOME/bin
 
 # Server Name and Port (used by reverse proxy to expose REST API)
 ENV VIRTUAL_HOST flink
 ENV VIRTUAL_PORT 8081
 
 LABEL description "Flink ${FLINK_VERSION} standalone server"
-LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -e HEAP=$HEAP --mount source=flink,target=/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
+LABEL usage "docker run -d --name=${VIRTUAL_HOST} --network=udn -v ${DOCKER_DATADIR}/flink:/data -p ${VIRTUAL_PORT} ${IMAGE_REPO:-local}/flink"
 
 # adding libgomp for XGBoost 
-RUN apk add --no-cache libgomp htop
+RUN apk add --no-cache libgomp 
 
-RUN set -x && mkdir -p /opt  \
-    && curl -s ${HTTP_MIRROR}/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-${FLINK_BUILD}.tgz | tar xzf - -C /opt \ 
-    && mv /opt/flink-${FLINK_VERSION} /opt/flink \
-    && cp /opt/flink/examples/streaming/WordCount.jar /opt/flink \
-    && rm -fr /opt/flink/docs /opt/flink/examples /opt/flink/opt \
-    && mkdir -p /data \
-    && adduser -DH -s /sbin/nologin flink \
-    && chown -R flink: /opt/flink /data 
+RUN set -x && mkdir -p /opt  /data \
+    && curl -s ${HTTP_MIRROR}/dist/flink/flink-${FLINK_VERSION}/flink-${FLINK_VERSION}-bin-${FLINK_BUILD}.tgz | tar xzf - -C /tmp \ 
+    && mv /tmp/flink-${FLINK_VERSION} $FLINK_HOME \
+    && cp $FLINK_HOME/examples/streaming/WordCount.jar $FLINK_HOME \
+    && addgroup -g $GID -S flink \
+    && adduser -u $UID -D -S -H -G flink -h $FLINK_HOME flink \
+    && chown -R flink: $FLINK_HOME /data 
 
-ENV PATH ${PATH}:/opt/flink/bin
+COPY entrypoint.sh  $FLINK_HOME/bin
 
-# entrypoint.sh shall be placed in Flink dir
-COPY entrypoint.sh /opt/flink/bin/
-
-WORKDIR /opt/flink
+WORKDIR $FLINK_HOME
 
 USER flink
 
-# Rest API 
 EXPOSE ${VIRTUAL_PORT}
-
-# Master web UI 
-EXPOSE 8081
 
 VOLUME /data
 

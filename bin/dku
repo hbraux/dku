@@ -198,6 +198,9 @@ function init {
 # unless env variable IMAGE_REPO is defined, the repo is the username 
 DKU_REPO=${IMAGE_REPO:-${USER,,}}
 
+# volumes directory
+DOCKER_DATADIR=${DOCKER_DATADIR:-$HOME/data}
+
 # ------------------------------------------
 # Configuration Parameters (loaded from Config file)
 # ------------------------------------------
@@ -205,7 +208,6 @@ DKU_REPO=${IMAGE_REPO:-${USER,,}}
 
 # name of user-defined bridge network 
 DKU_NETWORK_=udn  
-
 
 # ------------------------------------------
 # Global variables
@@ -277,10 +279,9 @@ function dockerCheck {
   id | grep -q '(docker)' || die "$USER does not be belong to docker group"
   _docker network ls | grep -q $DKU_NETWORK_ 
   if [[ $? -ne 0 ]]; then
-    info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network '$DKU_NETWORK_ (required for DNS resolution between containers)."
+    info "This is the first time $TOOL_NAME is run. Creating User-defined bridged network $DKU_NETWORK_"
     docker network create --driver bridge $DKU_NETWORK_ || die
-    # create the cache directory for Nginx
-    mkdir -p $HOME/cache
+    mkdir -p $DOCKER_DATADIR || die
     echo -e "\nRun '$TOOL_NAME help' to show available commands"
     exit 0
   fi
@@ -332,6 +333,7 @@ function getDockerImg {
 
 
 function dockerBuild {
+  buildargs=""
   id=$(docker images -q ${DKU_REPO}/${DockerImg} |head -1)
   if [[ -n $id ]]; then
     warn "Image $DockerImg [$id] already built"
@@ -354,9 +356,8 @@ function dockerBuild {
   if [[ $? -eq 0 ]]; then
     site=$(grep 'ARG HTTP_MIRROR=' $DockerDir/Dockerfile  | cut -d= -f2)
     [[ -n $site ]] || die "Dockerfile is not using HTTP_MIRROR as ARG"
-    ip=$(getent hosts $HOSTNAME | awk '{ print $1 }')
-    export no_proxy=$no_proxy,$ip
-    export HTTP_MIRROR=http://$ip/files
+    export HTTP_MIRROR=http://localhost/files
+    buildargs="$buildargs --network=host"
   fi
   # check if this a real image or an intermediate image
   egrep -q '^ENTRYPOINT' $DockerDir/Dockerfile
@@ -372,7 +373,7 @@ function dockerBuild {
   tags="-t ${DKU_REPO}/$DockerImg:latest"
   [[ -n $vers ]] && tags="$tags -t ${DKU_REPO}/$DockerImg:$vers"
 
-  buildargs="--build-arg http_proxy=$Proxy --build-arg https_proxy=$Proxy --build-arg no_proxy=$no_proxy"
+  buildargs="$buildargs --build-arg http_proxy=$Proxy --build-arg https_proxy=$Proxy --build-arg no_proxy=$no_proxy"
   export IMAGE_REPO=$DKU_REPO
   for arg in $(egrep "^ARG " $DockerDir/Dockerfile | sed 's/ARG \([A-Z_]*\)=.*/\1/') 
   do [[ -n ${!arg} ]] && buildargs="$buildargs --build-arg $arg=${!arg}"
@@ -430,6 +431,15 @@ function dockerRun {
     fi
     # Check for addtional @RUNOPTS@ 
     grep -q '# @RUNOPTS@' $DockerDir/Dockerfile && opts="$opts "$(grep '# @RUNOPTS@' $DockerDir/Dockerfile | cut -c 12-)
+    # create the data dir if necessary
+    echo "$opts" | grep -q '\-v'
+    if [[ $? -eq 0 ]]; then
+        datadir=$DOCKER_DATADIR/$DockerVolume
+        if [[ ! -d $datadir ]] ; then
+            info "Creating Docker data directory $datadir"
+            mkdir -p -m=0777 $datadir || die
+        fi
+    fi
     args=""
   else # command mode
     # if the first argument is an application name, push the JAR to container
