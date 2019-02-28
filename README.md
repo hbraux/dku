@@ -17,7 +17,7 @@ docker inspect --format='{{range $k,$v:=.Config.Labels}}{{$k}}: {{println $v}}{{
 From non root user:
 ```
 git clone THIS_REPO 
-ln -s $(pwd)/dku/bin/dku $HOME/in/dku
+ln -s $(pwd)/dku/bin/dku $HOME/bin/dku
 dku
 ```
 
@@ -26,23 +26,19 @@ The default repository is the username. It can be orriden by setting varible IMA
 
 ## Image List
 
-Name | Size | Description
----- | ---- | ----
-alpine-jdk   | 80MB  | alpine image with JDK
-alpine-llvm  | 80MB  | alpine image with LLVM
+Name | Description
+---- | ----
+alpine-jdk   | alpine image with JDK
+alpine-llvm  | alpine image with LLVM
+nginx        | Nginx with Reverse Proxy and Static Files support
+hbase        | HBase with Rest API 
+elastic      | Elasticsearch 
+cassandra    | Cassandra
+mongodb      | MongoDB with Restheart API 
+kafka        | Kafka server
+rethinkdb    | RethinkDB 
+logstash     | Logstash
+nifi         | NiFi 1.7.1 slim server 
 
-nginx        | 18MB  | Nginx with Reverse Proxy and Static Files support
-hbase        | 165MB | HBase with Rest API 
-elastic      | 120MB | Elasticsearch
-cassandra    | 155MB | Cassandra
-mongodb      | 200MB | MongoDB with Restheart API 
-kafka        | 120MB | Kafka server
-rethinkdb    | 50MB  | RethinkDB 
 
-logstash     | 270MB | Logstash 5.6 server
-nifi         | 360MB | NiFi 1.7.1 slim server 
-jupyter      | 430MB | A Jupyter Server with ML libs 
-
-## TODO list
-* HBase support of Java Client (issue of dynamic ports)
 
