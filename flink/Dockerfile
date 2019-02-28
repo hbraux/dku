@@ -31,7 +31,7 @@ RUN set -x && mkdir -p /opt  /data \
     && cp $FLINK_HOME/examples/streaming/WordCount.jar $FLINK_HOME \
     && addgroup -g $GID -S flink \
     && adduser -u $UID -D -S -H -G flink -h $FLINK_HOME flink \
-    && chown -R flink: $FLINK_HOME /data 
+    && chown -R flink:flink $FLINK_HOME /data 
 
 COPY entrypoint.sh  $FLINK_HOME/bin
 

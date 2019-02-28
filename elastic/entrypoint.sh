@@ -10,7 +10,7 @@ function _setup {
   # starting Elastic in production mode for connectivity purpose 
   # See https://www.elastic.co/guide/en/elasticsearch/reference/5.2/bootstrap-checks.html#_development_vs_production_mode
   cat>>config/elasticsearch.yml <<EOF
-cluster.name: $CLUSTER_NAME
+cluster.name: ${ELASTICSEARCH_CLUSTERNAME}
 path.data: /data
 network.host: [_eth0_]
 EOF
