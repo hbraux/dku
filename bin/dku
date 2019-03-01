@@ -518,9 +518,10 @@ function dockerStatus {
   then 
     _docker images
     _docker ps -a
-  else 
+  else
+    # 
     info "$ docker images .."
-    docker images --format 'table{{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}' --filter=reference='*/*:[0-9]*'
+    docker images --format 'table{{.Repository}}:{{.Tag}}\t{{.ID}}\t{{.Size}}' --filter reference="$DKU_REPO/*:*[0-9]"
     info "$ docker ps .."
     docker ps -a  --format 'table{{.Image}}:{{.Names}}\t{{.ID}}\t{{.Status}}'
   fi
